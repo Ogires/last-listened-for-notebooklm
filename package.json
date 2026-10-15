@@ -1,0 +1,12 @@
+{
+  "name": "notebooklm-last-played",
+  "private": true,
+  "description": "Extensión de Chrome: última escucha de cada Audio Overview de NotebookLM",
+  "scripts": {
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "jsdom": "^29.1.1",
+    "vitest": "^5.0.4"
+  }
+}
