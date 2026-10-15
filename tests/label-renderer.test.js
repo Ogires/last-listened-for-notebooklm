@@ -40,6 +40,9 @@ describe('createLabelRenderer', () => {
     expect(labels.length).toBe(2);
     expect(labels[0].textContent).toContain('Última escucha: ');
     expect(labels[1].textContent).toBe('');
+    // la etiqueta vive dentro del ancla visual (.artifact-button-content)
+    expect(labels[0].parentElement.className).toBe('artifact-button-content');
+    expect(labels[0].title).toContain('Última escucha');
     renderer.disconnect();
   });
 

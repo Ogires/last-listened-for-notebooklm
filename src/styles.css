@@ -1,11 +1,22 @@
-/* Etiqueta "Última escucha". Hereda el color del texto de la tarjeta para
-   funcionar en tema claro y oscuro sin selectores adicionales. */
+/* Etiqueta "Última escucha" — franja inferior de la tarjeta del resumen.
+   La tarjeta (artifact-library-item) es una fila de 60 px llena (icono +
+   título + detalles + botones) con overflow: hidden: la única zona libre es
+   un pasillo horizontal de ~13 px bajo la línea de detalles. La etiqueta se
+   ancla ahí de forma absoluta (el ancla .artifact-button-content ya es
+   position: relative) y con pointer-events: none para no robar el clic. */
 .nlm-last-played {
-  font-size: 12px;
-  line-height: 1.4;
-  margin-top: 4px;
-  opacity: 0.7;
+  position: absolute;
+  left: 44px; /* salta el icono (32 px + gap 8 px) */
+  right: 8px;
+  bottom: 1px;
+  font-size: 10px;
+  line-height: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   color: inherit;
+  opacity: 0.65;
+  pointer-events: none;
 }
 
 .nlm-last-played:empty {
