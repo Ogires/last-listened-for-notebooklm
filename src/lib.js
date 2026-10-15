@@ -89,6 +89,25 @@
     );
   }
 
+  // https://notebooklm.google.com/notebook/<id>... -> "<id>"
+  // El formato exacto se valida en la fase de inspección (Task 10).
+  function getNotebookIdFromUrl(url) {
+    const m = /\/notebook\/([0-9a-zA-Z-]+)/.exec(url || '');
+    return m ? m[1] : null;
+  }
+
+  function storageKey(notebookId, overviewKey) {
+    return String(notebookId) + '|' + String(overviewKey);
+  }
+
+  // Clave visible de una tarjeta: título normalizado; si no hay título,
+  // índice dentro de la lista. Limitación conocida (ver design doc): dos
+  // resúmenes con el mismo título colisionan; se refina en la inspección.
+  function overviewKeyFromCardData(title, index) {
+    const t = (title || '').trim().toLowerCase().replace(/\s+/g, ' ');
+    return t || '#' + index;
+  }
+
   NLM.lib = {
     THRESHOLD_MS,
     MAX_DELTA_SEC,
@@ -96,5 +115,8 @@
     formatDateTime,
     formatRelative,
     formatLastPlayed,
+    getNotebookIdFromUrl,
+    storageKey,
+    overviewKeyFromCardData,
   };
 })(globalThis);
