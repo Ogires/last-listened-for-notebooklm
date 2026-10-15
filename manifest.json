@@ -6,7 +6,7 @@
   "permissions": ["storage"],
   "content_scripts": [
     {
-      "matches": ["https://notebooklm.google.com/*"],
+      "matches": ["https://notebook.google.com/*", "https://notebooklm.google.com/*"],
       "run_at": "document_idle",
       "css": ["src/styles.css"],
       "js": [
