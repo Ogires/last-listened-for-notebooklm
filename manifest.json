@@ -14,7 +14,6 @@
         "src/storage.js",
         "src/player-tracker.js",
         "src/selectors.js",
-        "src/identifier.js",
         "src/label-renderer.js",
         "src/content.js"
       ]
