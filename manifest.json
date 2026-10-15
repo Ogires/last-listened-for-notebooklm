@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "NotebookLM — Última escucha",
+  "name": "last-time",
   "version": "0.1.0",
   "description": "Muestra la fecha y hora de la última vez que escuchaste cada resumen de audio de NotebookLM.",
   "permissions": ["storage"],
