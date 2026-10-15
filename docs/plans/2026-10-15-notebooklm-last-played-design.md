@@ -111,3 +111,22 @@ diseño (eventos, umbral, storage, formato) no depende de esa estructura.
 - Resúmenes de vídeo (solo Audio Overviews).
 - Sincronización entre equipos (`storage.sync`).
 - Publicación en Chrome Web Store.
+
+## Addendum tras inspección en vivo (2026-10-15)
+
+La inspección real con sesión iniciada cambió tres supuestos del diseño:
+
+1. **Dominio**: NotebookLM vive en `notebook.google.com` (no
+   `notebooklm.google.com`). El manifest incluye ambos.
+2. **No existe `<audio>` accesible** (`querySelectorAll('audio')` = 0 incluso
+   reproduciendo). El reproductor es Angular Material. Plan B aplicado: el
+   tracker sondea el DOM cada 500 ms — el botón `Pause audio player` presente
+   significa que suena; el tiempo efectivo se acumula desde el texto
+   `MM:SS / MM:SS` reutilizando el acumulador de 5 s (seeks no cuentan).
+3. **Atribución por UUID de artefacto**: el atributo `jslog` de los botones
+   codifica en base64 `[[notebookId, artifactId, ...]]`. La clave de storage
+   pasa de `notebookId|título` a `notebookId|artifactUUID` (estable y única).
+   `identifier.js` deja de ser necesario y se elimina.
+
+Tarjetas: `artifact-library-item` dentro de `artifact-library` (33 resúmenes
+de audio en el cuaderno de prueba, cada uno con UUID propio verificado).
