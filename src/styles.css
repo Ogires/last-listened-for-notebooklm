@@ -1,0 +1,13 @@
+/* Etiqueta "Última escucha". Hereda el color del texto de la tarjeta para
+   funcionar en tema claro y oscuro sin selectores adicionales. */
+.nlm-last-played {
+  font-size: 12px;
+  line-height: 1.4;
+  margin-top: 4px;
+  opacity: 0.7;
+  color: inherit;
+}
+
+.nlm-last-played:empty {
+  display: none;
+}
