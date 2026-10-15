@@ -1,5 +1,5 @@
 {
-  "name": "notebooklm-last-played",
+  "name": "last-time",
   "private": true,
   "description": "Extensión de Chrome: última escucha de cada Audio Overview de NotebookLM",
   "scripts": {

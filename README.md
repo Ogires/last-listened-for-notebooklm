@@ -1,4 +1,4 @@
-# NotebookLM — Última escucha
+# last-time
 
 Extensión de Chrome que registra y muestra la fecha/hora de la última vez que
 escuchaste cada resumen de audio (Audio Overview) de NotebookLM.
