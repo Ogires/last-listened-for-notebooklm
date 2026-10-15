@@ -1,7 +1,8 @@
 # last-time
 
 Extensión de Chrome que registra y muestra la fecha/hora de la última vez que
-escuchaste cada resumen de audio (Audio Overview) de NotebookLM.
+escuchaste cada resumen de audio (Audio Overview) de NotebookLM
+(`notebook.google.com`).
 
 - Cuenta una escucha tras 5 segundos efectivos de reproducción.
 - Muestra "Última escucha: DD/MM/YYYY HH:MM (hace X)" en la tarjeta del resumen.
