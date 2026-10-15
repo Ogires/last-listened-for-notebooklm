@@ -44,9 +44,57 @@
     };
   }
 
+  function pad2(n) {
+    return String(n).padStart(2, '0');
+  }
+
+  // "15/10/2026 12:44" en hora local, sin depender del locale del sistema.
+  function formatDateTime(date) {
+    return (
+      pad2(date.getDate()) +
+      '/' +
+      pad2(date.getMonth() + 1) +
+      '/' +
+      date.getFullYear() +
+      ' ' +
+      pad2(date.getHours()) +
+      ':' +
+      pad2(date.getMinutes())
+    );
+  }
+
+  // "hace 30 s" | "hace 5 min" | "hace 3 h" | "hace 1 día" | "hace 2 semanas"
+  function formatRelative(date, now) {
+    const sec = Math.floor((now.getTime() - date.getTime()) / 1000);
+    if (sec < 60) return 'hace ' + sec + ' s';
+    const min = Math.floor(sec / 60);
+    if (min < 60) return 'hace ' + min + ' min';
+    const h = Math.floor(min / 60);
+    if (h < 24) return 'hace ' + h + ' h';
+    const d = Math.floor(h / 24);
+    if (d < 7) return 'hace ' + d + (d === 1 ? ' día' : ' días');
+    const w = Math.floor(d / 7);
+    return 'hace ' + w + (w === 1 ? ' semana' : ' semanas');
+  }
+
+  // "Última escucha: 15/10/2026 12:44 (hace 2 h)"
+  function formatLastPlayed(iso, now) {
+    const d = new Date(iso);
+    return (
+      'Última escucha: ' +
+      formatDateTime(d) +
+      ' (' +
+      formatRelative(d, now || new Date()) +
+      ')'
+    );
+  }
+
   NLM.lib = {
     THRESHOLD_MS,
     MAX_DELTA_SEC,
     createPlaybackSession,
+    formatDateTime,
+    formatRelative,
+    formatLastPlayed,
   };
 })(globalThis);
