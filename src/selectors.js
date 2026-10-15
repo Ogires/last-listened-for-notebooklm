@@ -13,6 +13,9 @@
     // Botón reproducir/pausar de la tarjeta; su jslog lleva el UUID del
     // artefacto. El tooltip cambia entre "Play" y "Pause" según el estado.
     cardPlayButton: 'nb-icon-button[mattooltip="Play"], nb-icon-button[mattooltip="Pause"]',
+    // Ancla visual para inyectar la etiqueta: la fila de contenido de la
+    // tarjeta (position: relative, 284x60 con overflow hidden).
+    cardLabelAnchor: '.artifact-button-content',
     // Botón del reproductor: presente solo mientras el audio SUENA
     // (en pausa vuelve a ser "Play audio player").
     playerPlaying: '[aria-label="Pause audio player"]',

@@ -12,12 +12,15 @@
   function createLabelRenderer(opts) {
     const doc = opts.doc || document;
 
+    // La etiqueta vive dentro del ancla visual de la tarjeta (.artifact-
+    // button-content), no como hija directa de la tarjeta (display: inline).
     function labelEl(card) {
-      let el = card.querySelector(':scope > .' + LABEL_CLASS);
+      const anchor = card.querySelector(NLM.selectors.cardLabelAnchor) || card;
+      let el = anchor.querySelector(':scope > .' + LABEL_CLASS);
       if (!el) {
         el = doc.createElement('div');
         el.className = LABEL_CLASS;
-        card.appendChild(el);
+        anchor.appendChild(el);
       }
       return el;
     }
@@ -32,6 +35,7 @@
       const el = labelEl(card);
       const text = iso ? formatLastPlayed(iso, new Date()) : '';
       if (el.textContent !== text) el.textContent = text;
+      el.title = text; // tooltip nativo con el texto completo
       el.dataset.nlmIso = iso || '';
     }
 
