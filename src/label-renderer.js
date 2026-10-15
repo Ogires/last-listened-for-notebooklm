@@ -5,7 +5,7 @@
   'use strict';
   const NLM = global.NLM || (global.NLM = {});
   const formatLastPlayed = NLM.lib.formatLastPlayed;
-  const overviewKeyFromCardData = NLM.lib.overviewKeyFromCardData;
+  const artifactIdFromJslog = NLM.lib.artifactIdFromJslog;
 
   const LABEL_CLASS = 'nlm-last-played';
 
@@ -22,10 +22,13 @@
       return el;
     }
 
-    async function renderCard(card, index) {
-      const titleEl = card.querySelector(NLM.selectors.cardTitle);
-      const ovKey = overviewKeyFromCardData(titleEl && titleEl.textContent, index);
-      const iso = await opts.getTimestamp(ovKey);
+    // Clave de la tarjeta: UUID del artefacto leído del jslog de su botón.
+    // Tarjetas sin jslog (p. ej. tipos de artefacto sin tracker) se saltan.
+    async function renderCard(card) {
+      const btn = card.querySelector(NLM.selectors.cardPlayButton);
+      const key = btn ? artifactIdFromJslog(btn.getAttribute('jslog')) : null;
+      if (!key) return;
+      const iso = await opts.getTimestamp(key);
       const el = labelEl(card);
       const text = iso ? formatLastPlayed(iso, new Date()) : '';
       if (el.textContent !== text) el.textContent = text;
@@ -35,9 +38,9 @@
     async function renderAll() {
       const cards = doc.querySelectorAll(NLM.selectors.card);
       const jobs = [];
-      cards.forEach((card, i) => {
+      cards.forEach((card) => {
         try {
-          jobs.push(renderCard(card, i));
+          jobs.push(renderCard(card));
         } catch (e) {
           console.warn('[NLM] renderCard', e);
         }

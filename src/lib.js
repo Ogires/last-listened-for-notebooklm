@@ -100,12 +100,30 @@
     return String(notebookId) + '|' + String(overviewKey);
   }
 
-  // Clave visible de una tarjeta: título normalizado; si no hay título,
-  // índice dentro de la lista. Limitación conocida (ver design doc): dos
-  // resúmenes con el mismo título colisionan; se refina en la inspección.
-  function overviewKeyFromCardData(title, index) {
-    const t = (title || '').trim().toLowerCase().replace(/\s+/g, ' ');
-    return t || '#' + index;
+  // "  00:11 / 19:07" -> 11 ; "1:02:03 / ..." -> 3723 ; sin patrón -> null.
+  // Anclado al inicio del componente horario para no aceptar decimales
+  // parciales (p. ej. "00:0.5" no debe matchear el "5" suelto).
+  function parsePlaybackSeconds(text) {
+    const m = /^\s*((?:\d+:)*\d+)\s*\//.exec(text || '');
+    if (!m) return null;
+    const parts = m[1].split(':');
+    return parts.reduce((acc, p) => acc * 60 + Number(p), 0);
+  }
+
+  // jslog de NotebookLM: "id;track:...;0:<base64>" donde el base64 decodifica
+  // a un array cuyo [0][0] es el UUID del cuaderno y [0][1] el del artefacto
+  // (el resumen de audio). Devuelve el UUID del artefacto o null.
+  function artifactIdFromJslog(jslog) {
+    if (!jslog) return null;
+    const m = /0:([A-Za-z0-9+/=]+)/.exec(jslog);
+    if (!m) return null;
+    try {
+      const arr = JSON.parse(global.atob(m[1]));
+      const first = Array.isArray(arr) ? arr[0] : null;
+      return first && typeof first[1] === 'string' ? first[1] : null;
+    } catch (e) {
+      return null;
+    }
   }
 
   NLM.lib = {
@@ -117,6 +135,7 @@
     formatLastPlayed,
     getNotebookIdFromUrl,
     storageKey,
-    overviewKeyFromCardData,
+    parsePlaybackSeconds,
+    artifactIdFromJslog,
   };
 })(globalThis);

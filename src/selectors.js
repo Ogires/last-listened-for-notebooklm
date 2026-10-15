@@ -1,20 +1,22 @@
-// Selectores del DOM de NotebookLM. ⚠ PLACEHOLDER HEURÍSTICO: se validan y
-// ajustan en la fase de inspección real (Task 10). Único lugar del código
-// que conoce la estructura de la página.
+// Selectores del DOM de NotebookLM, validados por inspección en vivo
+// (2026-10-15, notebook.google.com). Único lugar del código que conoce la
+// estructura de la página.
 (function (global) {
   'use strict';
   const NLM = global.NLM || (global.NLM = {});
 
   NLM.selectors = {
-    // Contenedor de la lista de Audio Overviews (panel Studio).
-    cardsContainer: 'body',
-    // Tarjeta individual de un Audio Overview.
-    card: '[class*="udioverview" i], [class*="audio-overview" i]',
-    // Título visible del resumen dentro de la tarjeta.
-    cardTitle: 'h1, h2, h3, h4, [class*="title" i]',
-    // Botón de reproducir/pausar de la tarjeta (aria-label cambia con el estado).
-    playButton: 'button',
-    // Título en el reproductor expandido.
-    playerTitle: '[class*="title" i]',
+    // Biblioteca de artefactos generados (panel Studio).
+    cardsContainer: 'artifact-library',
+    // Tarjeta de un Audio/Video Overview.
+    card: 'artifact-library-item',
+    // Botón reproducir/pausar de la tarjeta; su jslog lleva el UUID del
+    // artefacto. El tooltip cambia entre "Play" y "Pause" según el estado.
+    cardPlayButton: 'nb-icon-button[mattooltip="Play"], nb-icon-button[mattooltip="Pause"]',
+    // Botón del reproductor: presente solo mientras el audio SUENA
+    // (en pausa vuelve a ser "Play audio player").
+    playerPlaying: '[aria-label="Pause audio player"]',
+    // Texto "MM:SS / MM:SS" con el tiempo actual del reproductor.
+    playerTime: '.playback-time-container',
   };
 })(globalThis);

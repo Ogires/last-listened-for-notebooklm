@@ -1,6 +1,6 @@
-// Punto de entrada: conecta tracker + identifier + storage + renderer.
-// NotebookLM es una SPA: al cambiar de cuaderno cambia la URL sin recargar,
-// así que el renderer se vigila cada segundo y se recrea si cambia el cuaderno.
+// Punto de entrada: conecta tracker + storage + renderer. NotebookLM es una
+// SPA: al cambiar de cuaderno cambia la URL sin recargar, así que el renderer
+// se vigila cada segundo y se recrea si cambia el cuaderno.
 (function (global) {
   'use strict';
   const NLM = global.NLM || (global.NLM = {});
@@ -26,9 +26,9 @@
   ensureRenderer();
   setInterval(ensureRenderer, 1000);
 
-  NLM.playerTracker.attachAudioTracker(global.document, async () => {
+  NLM.playerTracker.attachPlayerTracker(global.document, async (artifactId) => {
     const nbId = getNotebookIdFromUrl(global.location.href) || 'unknown';
-    const ovKey = NLM.identifier.activeOverviewKey(global.document) || 'unknown';
+    const ovKey = artifactId || 'unknown';
     const iso = new Date().toISOString();
     console.info('[NLM] escucha registrada:', nbId, ovKey, iso);
     await store.set(storageKey(nbId, ovKey), iso);
