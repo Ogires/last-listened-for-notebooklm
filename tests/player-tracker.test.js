@@ -24,11 +24,11 @@ function setPlayer({ playing, seconds, artifact, label }) {
     : '';
 }
 
-// Reproductor ABIERTO pero SIN botón de pausa (para el aviso de silencio).
-function setPlayerOpenNotPlaying(seconds) {
+// Reproductor abierto con el tiempo ilegible (para el aviso de DOM roto).
+function setPlayerUnreadableTime() {
   document.body.innerHTML = `<div class="player">
       <button class="playback-control-button" aria-label="Play audio player"></button>
-      <div class="playback-time-container">${fmt(seconds)} / 19:07</div>
+      <div class="playback-time-container">--:-- / --:--</div>
     </div>`;
 }
 
@@ -124,9 +124,9 @@ describe('attachPlayerTracker (DOM)', () => {
     expect(onPlayed).not.toHaveBeenCalled();
   });
 
-  it('avisa en consola si el reproductor está abierto pero no detecta nada', () => {
+  it('avisa en consola si el reproductor tiene el tiempo ilegible', () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
-    setPlayerOpenNotPlaying(10);
+    setPlayerUnreadableTime();
     tracker.poll();
     tracker.poll();
     expect(warn).not.toHaveBeenCalled(); // aún bajo el umbral (3)
@@ -136,5 +136,68 @@ describe('attachPlayerTracker (DOM)', () => {
     tracker.poll();
     expect(warn).toHaveBeenCalledTimes(1); // no repite el aviso
     warn.mockRestore();
+  });
+
+  it('un reproductor en pausa con tiempo legible no avisa', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    for (let i = 0; i < 5; i++) {
+      setPlayer({ playing: true, seconds: 10, artifact: ART_1, label: 'Play audio player' });
+      tracker.poll();
+    }
+    expect(warn).not.toHaveBeenCalled();
+    warn.mockRestore();
+  });
+});
+
+// UI en un idioma sin "paus" en la etiqueta (japonés): solo queda la señal del
+// tiempo. Reloj falso: cada poll avanza 500 ms y el texto, como en la UI real,
+// tiene resolución de 1 s.
+describe('attachPlayerTracker sin etiqueta de pausa reconocible', () => {
+  const JA_PAUSE = '一時停止';
+  let tracker;
+  let onPlayed;
+  let clock;
+
+  beforeEach(() => {
+    onPlayed = vi.fn();
+    clock = 0;
+    tracker = playerTracker.attachPlayerTracker(document, onPlayed, {
+      pollMs: 60000,
+      now: () => clock,
+    });
+  });
+
+  function step(seconds, artifact = ART_1) {
+    clock += 500;
+    setPlayer({ playing: true, seconds, artifact, label: JA_PAUSE });
+    tracker.poll();
+  }
+
+  function play(from, to, artifact) {
+    for (let t = from; t <= to; t += 0.5) step(t, artifact);
+  }
+
+  it('detecta la reproducción por el avance del tiempo', () => {
+    play(0, 5.5);
+    expect(onPlayed).not.toHaveBeenCalled(); // 1 s perdido en detectar el avance
+    play(6, 6);
+    expect(onPlayed).toHaveBeenCalledTimes(1);
+    expect(onPlayed).toHaveBeenCalledWith(ART_1);
+  });
+
+  it('un seek con el reproductor en pausa no cuenta como reproducción', () => {
+    step(0);
+    step(240); // salto en la barra
+    for (let i = 0; i < 20; i++) step(240); // tiempo parado 10 s
+    expect(onPlayed).not.toHaveBeenCalled();
+  });
+
+  it('el tiempo parado más de stallMs cierra la sesión; reanudar exige otros 5 s', () => {
+    play(0, 3);
+    for (let i = 0; i < 10; i++) step(3); // pausa de 5 s (> 2,5 s)
+    play(3.5, 7.5); // 4 s más: no suma con los 2 s previos
+    expect(onPlayed).not.toHaveBeenCalled();
+    play(8, 9.5);
+    expect(onPlayed).toHaveBeenCalledTimes(1);
   });
 });

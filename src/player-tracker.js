@@ -1,47 +1,63 @@
 // Detecta la reproducción sondeando el DOM del reproductor de audio de
 // NotebookLM (no existe ningún <audio> accesible: el reproductor es Angular
-// Material). Señales: [aria-label="Pause audio player"] presente = sonando;
-// el tiempo actual está en "MM:SS / MM:SS"; el jslog del botón identifica el
-// artefacto que suena. Reutiliza el acumulador de escucha efectiva de lib.
+// Material). Dos señales de "sonando": (1) la etiqueta del botón central es
+// de pausa en un idioma conocido — respuesta inmediata; (2) independiente del
+// idioma: el texto "MM:SS / MM:SS" avanza a ritmo de reproducción. El jslog
+// del botón identifica el artefacto. Reutiliza el acumulador de lib.
 (function (global) {
   'use strict';
   const NLM = global.NLM || (global.NLM = {});
   const createPlaybackSession = NLM.lib.createPlaybackSession;
   const parsePlaybackSeconds = NLM.lib.parsePlaybackSeconds;
   const artifactIdFromJslog = NLM.lib.artifactIdFromJslog;
+  const MAX_DELTA_SEC = NLM.lib.MAX_DELTA_SEC;
 
   function attachPlayerTracker(doc, onPlayed, opts) {
     const sel = (opts && opts.selectors) || NLM.selectors;
     const pollMs = (opts && opts.pollMs) || 500;
-    // Aviso si el reproductor está abierto pero nunca se detecta reproducción
-    // (p. ej. idioma de UI fuera de los soportados): rompe el silencio de
-    // forma visible en vez de fallar sin síntomas.
+    const now = (opts && opts.now) || Date.now;
+    // El tiempo visible tiene resolución de 1 s y se sondea cada 500 ms: se
+    // considera que suena mientras haya avanzado hace menos de stallMs.
+    const stallMs = (opts && opts.stallMs) || 2500;
+    // Aviso si hay reproductor pero su tiempo es ilegible (cambio de DOM):
+    // sin tiempo no hay detección posible, mejor decirlo que fallar mudo.
     const warnAfterPolls = (opts && opts.warnAfterPolls) || 120;
     const session = createPlaybackSession();
     let wasPlaying = false;
     let lastArtifact = null;
-    let silence = 0;
+    let lastTimeSec = null;
+    let lastAdvanceAt = -Infinity;
+    let unreadable = 0;
     let warned = false;
 
     function poll() {
       const pauseBtn = doc.querySelector(sel.playerPlaying);
+      const button = pauseBtn || doc.querySelector(sel.playerButton);
       const timeEl = doc.querySelector(sel.playerTime);
-      const playing = !!pauseBtn;
-      const artifact = playing ? artifactIdFromJslog(pauseBtn.getAttribute('jslog')) : null;
+      const cur = timeEl ? parsePlaybackSeconds(timeEl.textContent) : null;
 
-      if (!playing && timeEl) {
-        silence++;
-        if (!warned && silence >= warnAfterPolls) {
+      if (button && cur === null) {
+        unreadable++;
+        if (!warned && unreadable >= warnAfterPolls) {
           warned = true;
-          console.warn(
-            '[NLM] reproductor de audio abierto pero sin detección de reproducción; ' +
-              '¿idioma de la UI no soportado por los selectores?'
-          );
+          console.warn('[NLM] reproductor de audio sin tiempo legible; ¿cambió el DOM de NotebookLM?');
         }
       } else {
-        silence = 0;
+        unreadable = 0;
         warned = false;
       }
+
+      // Avance a ritmo de reproducción; los seeks (saltos grandes o hacia
+      // atrás) no cuentan como señal de que suena.
+      if (cur !== null && lastTimeSec !== null) {
+        const delta = cur - lastTimeSec;
+        if (delta > 0 && delta <= MAX_DELTA_SEC) lastAdvanceAt = now();
+      }
+      lastTimeSec = cur;
+
+      const playing =
+        !!button && (!!pauseBtn || (cur !== null && now() - lastAdvanceAt < stallMs));
+      const artifact = playing ? artifactIdFromJslog(button.getAttribute('jslog')) : null;
 
       // Sesión nueva al empezar a sonar o al cambiar de artefacto (cola).
       if (playing && (!wasPlaying || artifact !== lastArtifact)) session.play();
@@ -49,9 +65,7 @@
       wasPlaying = playing;
       lastArtifact = artifact;
 
-      if (!playing) return null;
-      const cur = timeEl ? parsePlaybackSeconds(timeEl.textContent) : null;
-      if (cur === null) return null;
+      if (!playing || cur === null) return null;
       if (session.tick(cur)) {
         try {
           onPlayed(artifact);
