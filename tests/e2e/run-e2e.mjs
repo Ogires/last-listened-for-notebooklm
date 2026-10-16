@@ -1,5 +1,5 @@
-// E2E de la extensión con Playwright: lanza un Chrome real (el instalado en
-// el sistema, channel "chrome") con la extensión cargada (--load-extension),
+// E2E de la extensión con Playwright: lanza el Chromium de Playwright
+// (channel "chromium"; Chrome de marca ignora --load-extension desde la v137) con la extensión cargada (--load-extension),
 // intercepta https://notebook.google.com/** y sirve un fixture que replica
 // el DOM real (tarjetas + reproductor con jslog). La "reproducción" se
 // simula avanzando el texto de tiempo y poniendo el botón en estado pausa.
@@ -20,7 +20,10 @@ function jslog(notebook, artifact) {
 
 const ART1 = 'e2e-art-1';
 const ART2 = 'e2e-art-2';
+const ART3 = 'e2e-art-3';
 const NB = 'e2e-notebook';
+// Idioma que declara la página (<html lang>); '' = sin declarar.
+let pageLang = '';
 
 // Fixture que replica la estructura verificada en vivo:
 // artifact-library > artifact-library-item > .artifact-button-content >
@@ -38,8 +41,9 @@ function fixtureHtml() {
         <nb-icon-button mattooltip="Reproducir" jslog="${jslog(NB, art)}"></nb-icon-button>
       </div>
     </artifact-library-item>`;
-  return `<!DOCTYPE html><html><head><meta charset="utf-8"></head><body>
-    <artifact-library>${card(ART1, 'Resumen uno')}${card(ART2, 'Resumen dos')}</artifact-library>
+  const langAttr = pageLang ? ` lang="${pageLang}"` : '';
+  return `<!DOCTYPE html><html${langAttr}><head><meta charset="utf-8"></head><body>
+    <artifact-library>${card(ART1, 'Resumen uno')}${card(ART2, 'Resumen dos')}${card(ART3, 'Resumen tres')}</artifact-library>
     <div id="player"></div>
     <script>
       window.__sim = { open: false, playing: false, t: 0, pauseLabel: '', jslog: '' };
@@ -109,7 +113,7 @@ async function test(name, fn) {
 }
 
 const ctx = await chromium.launchPersistentContext(PROFILE, {
-  channel: 'chrome',
+  channel: 'chromium',
   headless: process.env.HEADLESS === '1',
   locale: 'es-ES', // etiquetas de la extensión en español, determinista
   viewport: { width: 1280, height: 720 },
@@ -127,7 +131,7 @@ try {
 
   await test('la extensión se inyecta (contenedores de etiqueta en las tarjetas)', async () => {
     const n = await page.evaluate(() => document.querySelectorAll('.nlm-last-played').length);
-    assert.equal(n, 2, 'esperaba 2 contenedores, hay ' + n);
+    assert.equal(n, 3, 'esperaba 3 contenedores, hay ' + n);
   });
 
   await test('sin escucha no hay texto de etiqueta', async () => {
@@ -138,11 +142,11 @@ try {
   await test('escucha ≥5 s con UI en INGLÉS ("Pause audio player") registra y etiqueta', async () => {
     await simulateListening(page, { artifact: ART1, pauseLabel: 'Pause audio player', seconds: 6 });
     const t = await waitFor(() => labelOf(page, 0).then((x) => (x ? x : null)), 8000, 'etiqueta tarjeta 1');
-    assert.match(t, /^Última escucha: \d{2}\/\d{2}\/\d{4} \d{2}:\d{2} \(hace \d+ s\)$/, t);
-    const tooltip = await page.evaluate(() =>
-      document.querySelectorAll('artifact-library-item')[0].querySelector('.nlm-last-played').title
+    assert.match(t, /^Última escucha: \d{2}\/\d{2}\/\d{4}, \d{2}:\d{2} \((ahora|hace \d+ s)\)$/, t);
+    const tooltip = await page.evaluate(
+      () => document.querySelectorAll('artifact-library-item')[0].title
     );
-    assert.equal(tooltip, t, 'tooltip debe replicar el texto');
+    assert.equal(tooltip, t, 'el tooltip de la tarjeta debe replicar el texto');
   });
 
   await test('la otra tarjeta sigue sin fecha (atribución por artefacto)', async () => {
@@ -162,12 +166,28 @@ try {
     assert.match(t, /^Última escucha: /, t);
   });
 
+  await test('UI en JAPONÉS ("一時停止"): detecta por avance del tiempo', async () => {
+    await page.evaluate(() => { window.__sim.playing = false; window.__sim.open = false; });
+    await page.waitForTimeout(1000);
+    await simulateListening(page, { artifact: ART3, pauseLabel: '一時停止', seconds: 7 });
+    const t = await waitFor(() => labelOf(page, 2).then((x) => (x ? x : null)), 8000, 'etiqueta tarjeta 3');
+    assert.match(t, /^Última escucha: /, t);
+  });
+
   await test('los datos persisten tras recargar la página', async () => {
     await page.evaluate(() => { window.__sim.playing = false; window.__sim.open = false; });
     await page.reload();
     await page.waitForTimeout(2000);
     const t1 = await waitFor(() => labelOf(page, 0).then((x) => (x ? x : null)), 8000, 'etiqueta tras reload');
     assert.match(t1, /^Última escucha: /, t1);
+  });
+
+  await test('página con lang="en" → etiqueta en inglés (manda la página, no el navegador)', async () => {
+    pageLang = 'en';
+    await page.reload();
+    await page.waitForTimeout(2000);
+    const t = await waitFor(() => labelOf(page, 0).then((x) => (x ? x : null)), 8000, 'etiqueta en inglés');
+    assert.match(t, /^Last listened: \d{2}\/\d{2}\/\d{4}, \d{2}:\d{2}\s[AP]M \(/, t);
   });
 } finally {
   await ctx.close();
