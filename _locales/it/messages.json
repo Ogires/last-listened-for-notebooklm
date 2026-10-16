@@ -1,4 +1,8 @@
 {
+  "extName": {
+    "message": "Ultimo ascolto per NotebookLM",
+    "description": "Nombre en chrome://extensions y en la Chrome Web Store (máx. 45)"
+  },
   "extDescription": {
     "message": "Mostra la data e l'ora dell'ultimo ascolto di ogni riepilogo audio di NotebookLM.",
     "description": "Descripción en chrome://extensions y en la Chrome Web Store"
