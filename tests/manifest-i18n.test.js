@@ -23,6 +23,15 @@ describe('localización del manifest (_locales)', () => {
     for (const k of msgKeys) expect(messages[k] && messages[k].message, `${loc}.${k}`).toBeTruthy();
   });
 
+  it('el nombre está localizado y cabe en el límite de Chrome (45 caracteres)', () => {
+    expect(manifest.name).toBe('__MSG_extName__');
+    for (const loc of locales) {
+      const { extName } = JSON.parse(read(`_locales/${loc}/messages.json`));
+      expect(extName.message.length, loc).toBeLessThanOrEqual(45);
+      expect(extName.message, loc).toMatch(/NotebookLM$/); // "… for NotebookLM": no oficial
+    }
+  });
+
   it('extDescription cabe en el límite de Chrome (132 caracteres)', () => {
     for (const loc of locales) {
       const { extDescription } = JSON.parse(read(`_locales/${loc}/messages.json`));

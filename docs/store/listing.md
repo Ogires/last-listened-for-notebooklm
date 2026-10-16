@@ -6,10 +6,9 @@ Textos listos para pegar en el panel de desarrollador
 
 ## Pendiente de decidir antes de publicar
 
-- **Nombre.** El manifest dice `last-time`, que no explica nada en la tienda.
-  Propuesta: **"Last listened for NotebookLM"** (≤ 45 caracteres). El "for"
-  deja claro que no es una extensión oficial de Google, que es lo que exige la
-  política de marcas. Se puede traducir con `__MSG_extName__` en `_locales`.
+- ~~**Nombre.**~~ Decidido: **"Last listened for NotebookLM"**, localizado en
+  `_locales/*/messages.json` (`extName`, ≤ 45 caracteres). El "for" deja claro
+  que no es una extensión oficial de Google (política de marcas).
 - **Capturas** (obligatoria al menos una, 1280×800 o 640×400): una tarjeta
   del panel Studio con la etiqueta visible. Ojo: que no salgan títulos de
   cuadernos privados.

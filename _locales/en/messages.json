@@ -1,4 +1,8 @@
 {
+  "extName": {
+    "message": "Last listened for NotebookLM",
+    "description": "Nombre en chrome://extensions y en la Chrome Web Store (máx. 45)"
+  },
   "extDescription": {
     "message": "Shows the date and time you last listened to each NotebookLM Audio Overview.",
     "description": "Descripción en chrome://extensions y en la Chrome Web Store"

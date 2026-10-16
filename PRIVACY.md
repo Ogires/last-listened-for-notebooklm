@@ -1,10 +1,10 @@
-# Privacy policy / Política de privacidad — last-time
+# Privacy policy / Política de privacidad — Last listened for NotebookLM
 
 *Last updated / Última actualización: 2026-10-16*
 
 ## English
 
-last-time does not collect, transmit or share any personal data.
+Last listened for NotebookLM does not collect, transmit or share any personal data.
 
 - The only data it stores is, for each NotebookLM Audio Overview you play, the
   date and time you last listened to it, keyed by the notebook's and the
@@ -17,7 +17,7 @@ last-time does not collect, transmit or share any personal data.
 
 ## Español
 
-last-time no recopila, transmite ni comparte ningún dato personal.
+Last listened for NotebookLM (Última escucha para NotebookLM) no recopila, transmite ni comparte ningún dato personal.
 
 - Lo único que guarda es, por cada resumen de audio de NotebookLM que
   reproduces, la fecha y hora de la última escucha, asociada a los
