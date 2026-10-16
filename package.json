@@ -3,10 +3,12 @@
   "private": true,
   "description": "Extensión de Chrome: última escucha de cada Audio Overview de NotebookLM",
   "scripts": {
-    "test": "vitest run"
+    "test": "vitest run",
+    "test:e2e": "node tests/e2e/run-e2e.mjs"
   },
   "devDependencies": {
     "jsdom": "^29.1.1",
+    "playwright": "^1.64.1",
     "vitest": "^5.0.4"
   }
 }
