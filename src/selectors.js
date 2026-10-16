@@ -18,9 +18,10 @@
     // Ancla visual para inyectar la etiqueta: la fila de contenido de la
     // tarjeta (position: relative, 284x60 con overflow hidden).
     cardLabelAnchor: '.artifact-button-content',
-    // Botón central del reproductor. Estado "sonando" = su etiqueta contiene
-    // "paus" (Pause/Pausa/Pausar/Pausieren... en en/es/pt/de/fr), anclado a
-    // la clase estable del botón para no matchear nada ajeno.
+    // Botón central del reproductor (clase estable); su jslog da el artefacto.
+    playerButton: '.playback-control-button',
+    // Atajo "sonando" si su etiqueta contiene "paus" (en/es/pt/de/fr/it). Para
+    // el resto de idiomas el tracker usa el avance del tiempo.
     playerPlaying:
       '.playback-control-button[aria-label*="paus" i], .playback-control-button[mattooltip*="paus" i]',
     // Texto "MM:SS / MM:SS" con el tiempo actual del reproductor.
