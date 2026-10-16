@@ -24,6 +24,7 @@ function setup(cardsHtml, timestamps, optsExtra) {
   const getTimestamp = async (key) => timestamps[key] || null;
   return labelRenderer.createLabelRenderer({
     notebookId: 'nb1',
+    lang: 'es',
     getTimestamp,
     refreshMs: 60000,
     ...optsExtra,
@@ -43,7 +44,9 @@ describe('createLabelRenderer', () => {
     expect(labels[1].textContent).toBe('');
     // la etiqueta vive dentro del ancla visual (.artifact-button-content)
     expect(labels[0].parentElement.className).toBe('artifact-button-content');
-    expect(labels[0].title).toContain('Última escucha');
+    // tooltip en la tarjeta (la etiqueta no recibe hover: pointer-events: none)
+    const card = labels[0].closest('artifact-library-item');
+    expect(card.title).toBe(labels[0].textContent);
     renderer.disconnect();
   });
 
@@ -88,6 +91,23 @@ describe('createLabelRenderer', () => {
     await new Promise((r) => setTimeout(r, 20));
     expect(document.querySelector('.nlm-last-played').textContent).toBe(first);
     expect(document.querySelectorAll('.nlm-last-played').length).toBe(1);
+    renderer.disconnect();
+  });
+
+  it('no pisa un title propio de la tarjeta', async () => {
+    document.body.innerHTML = '';
+    const renderer = setup(cardHtml('art-1', 'Resumen uno'), { 'art-1': ISO });
+    const card = document.querySelector('artifact-library-item');
+    card.title = 'title de NotebookLM';
+    await renderer.refresh();
+    expect(card.title).toBe('title de NotebookLM');
+    renderer.disconnect();
+  });
+
+  it('usa el idioma recibido (en)', async () => {
+    const renderer = setup(cardHtml('art-1', 'Resumen uno'), { 'art-1': ISO }, { lang: 'en' });
+    await new Promise((r) => setTimeout(r, 0));
+    expect(document.querySelector('.nlm-last-played').textContent).toMatch(/^Last listened: /);
     renderer.disconnect();
   });
 });
