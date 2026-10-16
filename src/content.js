@@ -40,7 +40,6 @@
     const nbId = getNotebookIdFromUrl(global.location.href) || 'unknown';
     const ovKey = artifactId || 'unknown';
     const iso = new Date().toISOString();
-    console.info('[NLM] escucha registrada:', nbId, ovKey, iso);
     await store.set(storageKey(nbId, ovKey), iso);
     ensureRenderer();
     if (renderer) renderer.refresh();
