@@ -6,8 +6,9 @@
    position: relative) y con pointer-events: none para no robar el clic. */
 .nlm-last-played {
   position: absolute;
-  left: 44px; /* salta el icono (32 px + gap 8 px) */
-  right: 8px;
+  /* Propiedades lógicas: en RTL (ar, he) el icono queda a la derecha. */
+  inset-inline-start: 44px; /* salta el icono (32 px + gap 8 px) */
+  inset-inline-end: 8px;
   bottom: 1px;
   font-size: 10px;
   line-height: 12px;
