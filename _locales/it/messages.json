@@ -1,0 +1,6 @@
+{
+  "extDescription": {
+    "message": "Mostra la data e l'ora dell'ultimo ascolto di ogni riepilogo audio di NotebookLM.",
+    "description": "Descripción en chrome://extensions y en la Chrome Web Store"
+  }
+}
