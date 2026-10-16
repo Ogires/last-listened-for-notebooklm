@@ -130,3 +130,13 @@ La inspección real con sesión iniciada cambió tres supuestos del diseño:
 
 Tarjetas: `artifact-library-item` dentro de `artifact-library` (33 resúmenes
 de audio en el cuaderno de prueba, cada uno con UUID propio verificado).
+
+4. **Localización y selectores blindados (2026-10-16, v0.2.0)**: los textos
+   visibles siguen `navigator.language` (es/en, fallback es) vía tabla I18N
+   en `lib.js`. Los selectores evitan textos traducibles: el botón central del
+   reproductor se detecta por su clase estable `playback-control-button` +
+   subcadena "paus" (pause/pausa/pausar…), y las tarjetas se clavean por
+   cualquier botón `[mattooltip][jslog]` (el UUID del artefacto es común a
+   todos los botones de la tarjeta). Si el reproductor está abierto ~60 s sin
+   detección posible, se emite un aviso en consola en vez de fallar en
+   silencio.

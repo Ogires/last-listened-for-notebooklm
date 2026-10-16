@@ -6,6 +6,8 @@ escuchaste cada resumen de audio (Audio Overview) de NotebookLM
 
 - Cuenta una escucha tras 5 segundos efectivos de reproducción.
 - Muestra "Última escucha: DD/MM/YYYY HH:MM (hace X)" en la tarjeta del resumen.
+- Idioma de la etiqueta según el navegador (`navigator.language`): es/en,
+  con fallback a español.
 - Datos locales (`chrome.storage.local`), sin sincronización.
 
 ## Desarrollo
