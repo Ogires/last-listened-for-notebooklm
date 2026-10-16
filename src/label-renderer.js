@@ -33,7 +33,7 @@
       if (!key) return;
       const iso = await opts.getTimestamp(key);
       const el = labelEl(card);
-      const text = iso ? formatLastPlayed(iso, new Date()) : '';
+      const text = iso ? formatLastPlayed(iso, new Date(), opts.lang) : '';
       if (el.textContent !== text) el.textContent = text;
       el.title = text; // tooltip nativo con el texto completo
       el.dataset.nlmIso = iso || '';
@@ -56,7 +56,8 @@
     function refreshRelative() {
       doc.querySelectorAll('.' + LABEL_CLASS).forEach((el) => {
         if (el.dataset.nlmIso && el.textContent) {
-          el.textContent = formatLastPlayed(el.dataset.nlmIso, new Date());
+          el.textContent = formatLastPlayed(el.dataset.nlmIso, new Date(), opts.lang);
+          el.title = el.textContent;
         }
       });
     }

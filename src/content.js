@@ -11,6 +11,7 @@
 
   let renderer = null;
   let renderedNotebookId = null;
+  const lang = (global.navigator && global.navigator.language) || 'es';
 
   function ensureRenderer() {
     const nbId = getNotebookIdFromUrl(global.location.href);
@@ -19,6 +20,7 @@
     renderedNotebookId = nbId;
     renderer = NLM.labelRenderer.createLabelRenderer({
       notebookId: nbId,
+      lang,
       getTimestamp: (ovKey) => store.get(storageKey(nbId, ovKey)),
     });
   }

@@ -11,21 +11,22 @@ function jslog(artifact) {
 }
 
 function cardHtml(artifact, title) {
+  // El tooltip en español demuestra que la clave es independiente del idioma:
+  // el selector solo requiere [mattooltip][jslog].
   const btn = artifact
-    ? `<nb-icon-button mattooltip="Play" jslog="${jslog(artifact)}"></nb-icon-button>`
+    ? `<nb-icon-button mattooltip="Reproducir" jslog="${jslog(artifact)}"></nb-icon-button>`
     : '';
   return `<artifact-library-item><div class="artifact-button-content">${title}${btn}</div></artifact-library-item>`;
 }
 
-function setup(cardsHtml, timestamps) {
+function setup(cardsHtml, timestamps, optsExtra) {
   document.body.innerHTML = `<artifact-library>${cardsHtml}</artifact-library>`;
-  globalThis.NLM.selectors.cardPlayButton =
-    'nb-icon-button[mattooltip="Play"], nb-icon-button[mattooltip="Pause"]';
   const getTimestamp = async (key) => timestamps[key] || null;
   return labelRenderer.createLabelRenderer({
     notebookId: 'nb1',
     getTimestamp,
     refreshMs: 60000,
+    ...optsExtra,
   });
 }
 
