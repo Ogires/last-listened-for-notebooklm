@@ -140,3 +140,12 @@ de audio en el cuaderno de prueba, cada uno con UUID propio verificado).
    todos los botones de la tarjeta). Si el reproductor está abierto ~60 s sin
    detección posible, se emite un aviso en consola en vez de fallar en
    silencio.
+
+5. **Localización completa (2026-10-16, v0.3.0)**: fecha y relativo con
+   `Intl.DateTimeFormat` / `Intl.RelativeTimeFormat` (estilo corto); solo el
+   prefijo vive en `LABELS` (lib.js). Idioma = `<html lang>` → `navigator.language`
+   → inglés (antes español); un idioma sin prefijo cae entero a inglés. El
+   manifest usa `_locales` (descripción). CSS con propiedades lógicas (RTL).
+   Tooltip en la tarjeta (la etiqueta no recibe hover). El tracker añade una
+   señal independiente del idioma — el tiempo avanza a ritmo de reproducción,
+   con 2,5 s de tolerancia — y el aviso de consola pasa a "tiempo ilegible".
