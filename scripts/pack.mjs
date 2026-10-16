@@ -1,4 +1,4 @@
-// Genera dist/last-time-<versión>.zip para subir a la Chrome Web Store, solo
+// Genera dist/last-listened-for-notebooklm-<versión>.zip para subir a la Chrome Web Store, solo
 // con lo que necesita la extensión (manifest, _locales, src, iconos PNG).
 // Escritor ZIP mínimo (deflate de zlib) para no añadir dependencias.
 //
@@ -84,7 +84,7 @@ if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1]
   const { version } = JSON.parse(readFileSync(join(root, 'manifest.json'), 'utf8'));
   const files = collectFiles(root);
   mkdirSync(join(root, 'dist'), { recursive: true });
-  const out = `dist/last-time-${version}.zip`;
+  const out = `dist/last-listened-for-notebooklm-${version}.zip`;
   writeFileSync(join(root, out), createZip(root, files));
   console.log(`${out} (${files.length} archivos)`);
 }
