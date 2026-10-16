@@ -16,6 +16,10 @@ escuchaste cada resumen de audio (Audio Overview) de NotebookLM
 
 - Pruebas: `npm test`
 - e2e: `npx playwright install chromium` (una vez) y `HEADLESS=1 npm run test:e2e`
+- Paquete para la Chrome Web Store: `npm run pack` → `dist/last-time-<versión>.zip`
+  (solo manifest, `_locales`, `src` e iconos). Ficha y privacidad en
+  `docs/store/listing.md` y `PRIVACY.md`.
+- Iconos: editar `icons/icon.svg` y regenerar los PNG con `npm run icons`.
 - Cargar en Chrome: `chrome://extensions` → activar *Modo desarrollador* →
   *Cargar descomprimida* → seleccionar la carpeta del proyecto (raíz, donde
   está `manifest.json`).
