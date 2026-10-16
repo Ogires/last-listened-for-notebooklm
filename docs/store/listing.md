@@ -2,7 +2,7 @@
 
 Textos listos para pegar en el panel de desarrollador
 (<https://chrome.google.com/webstore/devconsole>). El paquete se genera con
-`npm run pack` → `dist/last-time-<versión>.zip`.
+`npm run pack` → `dist/last-listened-for-notebooklm-<versión>.zip`.
 
 ## Pendiente de decidir antes de publicar
 
