@@ -104,6 +104,28 @@ describe('createLabelRenderer', () => {
     renderer.disconnect();
   });
 
+  // NotebookLM es una SPA: al volver a un cuaderno, Angular crea un
+  // artifact-library nuevo y el observer del viejo ya no ve nada.
+  it('isStale() detecta que Angular sustituyó el contenedor de tarjetas', async () => {
+    const renderer = setup(cardHtml('art-1', 'Resumen uno'), {});
+    expect(renderer.isStale()).toBe(false);
+    document.body.innerHTML = '<artifact-library></artifact-library>';
+    expect(renderer.isStale()).toBe(true);
+    renderer.disconnect();
+  });
+
+  it('isStale() es true si se creó antes de que existiera el contenedor', () => {
+    document.body.innerHTML = '';
+    const renderer = labelRenderer.createLabelRenderer({
+      notebookId: 'nb1',
+      getTimestamp: async () => null,
+    });
+    expect(renderer.isStale()).toBe(false); // sigue sin contenedor: vigila body
+    document.body.innerHTML = '<artifact-library></artifact-library>';
+    expect(renderer.isStale()).toBe(true);
+    renderer.disconnect();
+  });
+
   it('usa el idioma recibido (en)', async () => {
     const renderer = setup(cardHtml('art-1', 'Resumen uno'), { 'art-1': ISO }, { lang: 'en' });
     await new Promise((r) => setTimeout(r, 0));

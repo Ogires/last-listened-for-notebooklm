@@ -10,6 +10,9 @@
   inset-inline-start: 44px; /* salta el icono (32 px + gap 8 px) */
   inset-inline-end: 8px;
   bottom: 1px;
+  /* El ancla hereda Times New Roman: NotebookLM fija la fuente en cada
+     elemento de texto, no en el contenedor. Misma pila que .artifact-details. */
+  font-family: "Google Sans Flex", "Google Sans Text", "Google Sans", sans-serif;
   font-size: 10px;
   line-height: 12px;
   white-space: nowrap;

@@ -189,6 +189,27 @@ try {
     const t = await waitFor(() => labelOf(page, 0).then((x) => (x ? x : null)), 8000, 'etiqueta en inglés');
     assert.match(t, /^Last listened: \d{2}\/\d{2}\/\d{4}, \d{2}:\d{2}\s[AP]M \(/, t);
   });
+
+  // Visto en vivo: lista → mismo cuaderno sin recargar dejaba las tarjetas sin
+  // etiqueta, porque Angular recrea artifact-library y el renderer seguía
+  // observando el viejo.
+  await test('navegación SPA lista → mismo cuaderno: vuelven las etiquetas', async () => {
+    await page.evaluate(() => {
+      const lib = document.querySelector('artifact-library');
+      const clone = lib.cloneNode(true);
+      clone.querySelectorAll('.nlm-last-played').forEach((e) => e.remove());
+      window.__libHtml = clone.outerHTML;
+      history.pushState({}, '', '/');
+      lib.remove();
+    });
+    await page.waitForTimeout(1500);
+    await page.evaluate((nb) => {
+      history.pushState({}, '', '/notebook/' + nb);
+      document.body.insertAdjacentHTML('afterbegin', window.__libHtml);
+    }, NB);
+    const t = await waitFor(() => labelOf(page, 0).then((x) => (x ? x : null)), 5000, 'etiqueta tras SPA');
+    assert.match(t, /^Last listened: /, t);
+  });
 } finally {
   await ctx.close();
 }
