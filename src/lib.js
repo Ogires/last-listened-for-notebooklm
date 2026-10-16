@@ -48,43 +48,70 @@
     return String(n).padStart(2, '0');
   }
 
-  // "15/10/2026 12:44" en hora local, sin depender del locale del sistema.
-  function formatDateTime(date) {
-    return (
-      pad2(date.getDate()) +
-      '/' +
-      pad2(date.getMonth() + 1) +
-      '/' +
-      date.getFullYear() +
-      ' ' +
-      pad2(date.getHours()) +
-      ':' +
-      pad2(date.getMinutes())
-    );
+  // Textos visibles por idioma. Añadir un idioma = añadir una entrada aquí.
+  // 'ago' envuelve la unidad: es "hace 3 h" / en "3h ago".
+  const I18N = {
+    es: {
+      lastPlayed: 'Última escucha',
+      ago: (s) => 'hace ' + s,
+      sec: (n) => n + ' s',
+      min: (n) => n + ' min',
+      hour: (n) => n + ' h',
+      day: (n) => n + (n === 1 ? ' día' : ' días'),
+      week: (n) => n + (n === 1 ? ' semana' : ' semanas'),
+      dateTime: (d) =>
+        pad2(d.getDate()) + '/' + pad2(d.getMonth() + 1) + '/' + d.getFullYear() +
+        ' ' + pad2(d.getHours()) + ':' + pad2(d.getMinutes()),
+    },
+    en: {
+      lastPlayed: 'Last listened',
+      ago: (s) => s + ' ago',
+      sec: (n) => n + 's',
+      min: (n) => n + ' min',
+      hour: (n) => n + 'h',
+      day: (n) => n + (n === 1 ? ' day' : ' days'),
+      week: (n) => n + (n === 1 ? ' week' : ' weeks'),
+      dateTime: (d) =>
+        pad2(d.getMonth() + 1) + '/' + pad2(d.getDate()) + '/' + d.getFullYear() +
+        ' ' + pad2(d.getHours()) + ':' + pad2(d.getMinutes()),
+    },
+  };
+
+  // 'es-ES' -> es ; 'en-US' -> en ; desconocido/ausente -> es
+  function pickLocale(lang) {
+    const base = String(lang || 'es').toLowerCase().split('-')[0];
+    return I18N[base] || I18N.es;
   }
 
-  // "hace 30 s" | "hace 5 min" | "hace 3 h" | "hace 1 día" | "hace 2 semanas"
-  function formatRelative(date, now) {
+  function formatDateTime(date, lang) {
+    return pickLocale(lang).dateTime(date);
+  }
+
+  // es: "hace 30 s" | "hace 5 min" | "hace 3 h" | "hace 1 día" | "hace 2 semanas"
+  // en: "30s ago" | "5 min ago" | "3h ago" | "1 day ago" | "2 weeks ago"
+  function formatRelative(date, now, lang) {
+    const L = pickLocale(lang);
     const sec = Math.floor((now.getTime() - date.getTime()) / 1000);
-    if (sec < 60) return 'hace ' + sec + ' s';
+    if (sec < 60) return L.ago(L.sec(sec));
     const min = Math.floor(sec / 60);
-    if (min < 60) return 'hace ' + min + ' min';
+    if (min < 60) return L.ago(L.min(min));
     const h = Math.floor(min / 60);
-    if (h < 24) return 'hace ' + h + ' h';
+    if (h < 24) return L.ago(L.hour(h));
     const d = Math.floor(h / 24);
-    if (d < 7) return 'hace ' + d + (d === 1 ? ' día' : ' días');
-    const w = Math.floor(d / 7);
-    return 'hace ' + w + (w === 1 ? ' semana' : ' semanas');
+    if (d < 7) return L.ago(L.day(d));
+    return L.ago(L.week(Math.floor(d / 7)));
   }
 
-  // "Última escucha: 15/10/2026 12:44 (hace 2 h)"
-  function formatLastPlayed(iso, now) {
+  // es: "Última escucha: 15/10/2026 12:44 (hace 2 h)"
+  // en: "Last listened: 10/15/2026 12:44 (2h ago)"
+  function formatLastPlayed(iso, now, lang) {
     const d = new Date(iso);
     return (
-      'Última escucha: ' +
-      formatDateTime(d) +
+      pickLocale(lang).lastPlayed +
+      ': ' +
+      formatDateTime(d, lang) +
       ' (' +
-      formatRelative(d, now || new Date()) +
+      formatRelative(d, now || new Date(), lang) +
       ')'
     );
   }
