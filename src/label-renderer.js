@@ -82,13 +82,19 @@
         }
       }
     });
-    const container = doc.querySelector(NLM.selectors.cardsContainer) || doc.body;
-    observer.observe(container, { childList: true, subtree: true });
+    const container = doc.querySelector(NLM.selectors.cardsContainer);
+    observer.observe(container || doc.body, { childList: true, subtree: true });
 
     renderAll();
 
     return {
       refresh: renderAll,
+      // true si el contenedor observado ya no es el de la página (Angular lo
+      // recreó al navegar, o apareció después de crear el renderer).
+      isStale() {
+        const current = doc.querySelector(NLM.selectors.cardsContainer);
+        return current !== container && current !== null;
+      },
       disconnect() {
         observer.disconnect();
         clearInterval(relativeTimer);

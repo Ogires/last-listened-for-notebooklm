@@ -149,3 +149,16 @@ de audio en el cuaderno de prueba, cada uno con UUID propio verificado).
    Tooltip en la tarjeta (la etiqueta no recibe hover). El tracker añade una
    señal independiente del idioma — el tiempo avanza a ritmo de reproducción,
    con 2,5 s de tolerancia — y el aviso de consola pasa a "tiempo ilegible".
+
+6. **Validación en vivo (2026-10-16, Chromium 156, notebook.google.com)**:
+   `<html lang>` sigue a `?hl=` (en/es/ja/ar) y no persiste. Un único
+   `.playback-control-button`, con jslog del artefacto en "Play audio" y en
+   "Pause audio player". Con `?hl=ja` ("オーディオ プレーヤーを一時停止") la
+   escucha se registra por avance del tiempo en ~6 s; ja cae al idioma del
+   navegador. En `?hl=ar` (RTL) la etiqueta no pisa el icono. El tooltip lo
+   aporta la tarjeta. Dos defectos encontrados y corregidos: (a) volver al
+   mismo cuaderno por navegación SPA dejaba las tarjetas sin etiqueta —
+   Angular recrea `artifact-library` y el renderer observaba el viejo; ahora
+   `isStale()` lo detecta y `content.js` suelta el renderer fuera de un
+   cuaderno; (b) la etiqueta heredaba Times New Roman: se fija la pila de
+   fuentes de `.artifact-details`.

@@ -1,6 +1,7 @@
 // Punto de entrada: conecta tracker + storage + renderer. NotebookLM es una
 // SPA: al cambiar de cuaderno cambia la URL sin recargar, así que el renderer
-// se vigila cada segundo y se recrea si cambia el cuaderno.
+// se vigila cada segundo y se recrea si cambia el cuaderno o si Angular
+// sustituyó el contenedor de tarjetas.
 (function (global) {
   'use strict';
   const NLM = global.NLM || (global.NLM = {});
@@ -14,7 +15,15 @@
 
   function ensureRenderer() {
     const nbId = getNotebookIdFromUrl(global.location.href);
-    if (!nbId || nbId === renderedNotebookId) return;
+    if (!nbId) {
+      // Fuera de un cuaderno (lista): soltar el renderer para que volver al
+      // mismo cuaderno lo recree sobre el DOM nuevo.
+      if (renderer) renderer.disconnect();
+      renderer = null;
+      renderedNotebookId = null;
+      return;
+    }
+    if (nbId === renderedNotebookId && !renderer.isStale()) return;
     if (renderer) renderer.disconnect();
     renderedNotebookId = nbId;
     renderer = NLM.labelRenderer.createLabelRenderer({
