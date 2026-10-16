@@ -25,6 +25,14 @@
       return el;
     }
 
+    // El tooltip va en la tarjeta: la etiqueta tiene pointer-events: none y
+    // nunca recibe hover. No pisa un title que la tarjeta trajera de origen.
+    function setCardTitle(card, text) {
+      if (card.title && card.title !== card.dataset.nlmTitle) return;
+      card.title = text;
+      card.dataset.nlmTitle = text;
+    }
+
     // Clave de la tarjeta: UUID del artefacto leído del jslog de su botón.
     // Tarjetas sin jslog (p. ej. tipos de artefacto sin tracker) se saltan.
     async function renderCard(card) {
@@ -35,7 +43,7 @@
       const el = labelEl(card);
       const text = iso ? formatLastPlayed(iso, new Date(), opts.lang) : '';
       if (el.textContent !== text) el.textContent = text;
-      el.title = text; // tooltip nativo con el texto completo
+      setCardTitle(card, text);
       el.dataset.nlmIso = iso || '';
     }
 
@@ -57,7 +65,8 @@
       doc.querySelectorAll('.' + LABEL_CLASS).forEach((el) => {
         if (el.dataset.nlmIso && el.textContent) {
           el.textContent = formatLastPlayed(el.dataset.nlmIso, new Date(), opts.lang);
-          el.title = el.textContent;
+          const card = el.closest(NLM.selectors.card);
+          if (card) setCardTitle(card, el.textContent);
         }
       });
     }

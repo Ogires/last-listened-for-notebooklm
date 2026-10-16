@@ -44,80 +44,96 @@
     };
   }
 
-  function pad2(n) {
-    return String(n).padStart(2, '0');
+  // Prefijo visible por idioma; fechas y relativos los localiza Intl.
+  // Añadir un idioma = añadir una línea aquí. Los idiomas sin entrada caen
+  // por completo (prefijo, fecha y relativo) a FALLBACK_LANG.
+  const LABELS = {
+    en: 'Last listened',
+    es: 'Última escucha',
+    fr: 'Dernière écoute',
+    de: 'Zuletzt gehört',
+    pt: 'Última audição',
+    it: 'Ultimo ascolto',
+  };
+  const FALLBACK_LANG = 'en';
+
+  // Etiqueta BCP 47 canónica si su idioma tiene texto propio; si no, null.
+  // Conserva la región ('en-GB', 'pt-BR') porque cambia el formato de fecha.
+  function supportedTag(lang) {
+    if (!lang) return null;
+    try {
+      const tag = Intl.getCanonicalLocales(lang)[0];
+      return LABELS[tag.split('-')[0]] ? tag : null;
+    } catch (e) {
+      return null; // etiqueta mal formada ('es_ES', '')
+    }
   }
 
-  // Textos visibles por idioma. Añadir un idioma = añadir una entrada aquí.
-  // 'ago' envuelve la unidad: es "hace 3 h" / en "3h ago".
-  const I18N = {
-    es: {
-      lastPlayed: 'Última escucha',
-      ago: (s) => 'hace ' + s,
-      sec: (n) => n + ' s',
-      min: (n) => n + ' min',
-      hour: (n) => n + ' h',
-      day: (n) => n + (n === 1 ? ' día' : ' días'),
-      week: (n) => n + (n === 1 ? ' semana' : ' semanas'),
-      dateTime: (d) =>
-        pad2(d.getDate()) + '/' + pad2(d.getMonth() + 1) + '/' + d.getFullYear() +
-        ' ' + pad2(d.getHours()) + ':' + pad2(d.getMinutes()),
-    },
-    en: {
-      lastPlayed: 'Last listened',
-      ago: (s) => s + ' ago',
-      sec: (n) => n + 's',
-      min: (n) => n + ' min',
-      hour: (n) => n + 'h',
-      day: (n) => n + (n === 1 ? ' day' : ' days'),
-      week: (n) => n + (n === 1 ? ' week' : ' weeks'),
-      dateTime: (d) =>
-        pad2(d.getMonth() + 1) + '/' + pad2(d.getDate()) + '/' + d.getFullYear() +
-        ' ' + pad2(d.getHours()) + ':' + pad2(d.getMinutes()),
-    },
+  function resolveLang(lang) {
+    return supportedTag(lang) || FALLBACK_LANG;
+  }
+
+  // Idioma de la página (NotebookLM lo fija según su ajuste, ?hl=) antes que
+  // el del navegador: así la etiqueta habla el mismo idioma que la UI.
+  function detectLang(doc, nav) {
+    const page = doc && doc.documentElement ? doc.documentElement.lang : '';
+    return supportedTag(page) || supportedTag(nav && nav.language) || FALLBACK_LANG;
+  }
+
+  const DATE_TIME_OPTS = {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
   };
 
-  // 'es-ES' -> es ; 'en-US' -> en ; desconocido/ausente -> es
-  function pickLocale(lang) {
-    const base = String(lang || 'es').toLowerCase().split('-')[0];
-    return I18N[base] || I18N.es;
-  }
-
+  // es: "15/10/2026, 12:44" | en: "10/15/2026, 12:44 PM" | en-GB: "15/10/2026, 12:44"
   function formatDateTime(date, lang) {
-    return pickLocale(lang).dateTime(date);
+    return new Intl.DateTimeFormat(resolveLang(lang), DATE_TIME_OPTS).format(date);
   }
 
-  // es: "hace 30 s" | "hace 5 min" | "hace 3 h" | "hace 1 día" | "hace 2 semanas"
-  // en: "30s ago" | "5 min ago" | "3h ago" | "1 day ago" | "2 weeks ago"
+  // Unidad más grande que cabe en el lapso (meses y años aproximados).
+  const UNITS = [
+    ['year', 365 * 86400],
+    ['month', 30 * 86400],
+    ['week', 7 * 86400],
+    ['day', 86400],
+    ['hour', 3600],
+    ['minute', 60],
+  ];
+
+  // es: "ahora" | "hace 5 min" | "ayer" | "hace 2 sem." | "hace 2 a"
+  // en: "now" | "5 min. ago" | "yesterday" | "2 wk. ago" | "2 yr. ago"
+  // Un instante futuro (reloj desajustado) se trata como "ahora".
   function formatRelative(date, now, lang) {
-    const L = pickLocale(lang);
-    const sec = Math.floor((now.getTime() - date.getTime()) / 1000);
-    if (sec < 60) return L.ago(L.sec(sec));
-    const min = Math.floor(sec / 60);
-    if (min < 60) return L.ago(L.min(min));
-    const h = Math.floor(min / 60);
-    if (h < 24) return L.ago(L.hour(h));
-    const d = Math.floor(h / 24);
-    if (d < 7) return L.ago(L.day(d));
-    return L.ago(L.week(Math.floor(d / 7)));
+    const rtf = new Intl.RelativeTimeFormat(resolveLang(lang), {
+      numeric: 'auto',
+      style: 'short',
+    });
+    const sec = Math.max(0, Math.floor((now.getTime() - date.getTime()) / 1000));
+    for (const [unit, size] of UNITS) {
+      if (sec >= size) return rtf.format(-Math.floor(sec / size), unit);
+    }
+    return rtf.format(-sec, 'second');
   }
 
-  // es: "Última escucha: 15/10/2026 12:44 (hace 2 h)"
-  // en: "Last listened: 10/15/2026 12:44 (2h ago)"
+  // es: "Última escucha: 15/10/2026, 12:44 (hace 2 h)"
+  // en: "Last listened: 10/15/2026, 12:44 PM (2 hr. ago)"
   function formatLastPlayed(iso, now, lang) {
+    const tag = resolveLang(lang);
     const d = new Date(iso);
     return (
-      pickLocale(lang).lastPlayed +
+      LABELS[tag.split('-')[0]] +
       ': ' +
-      formatDateTime(d, lang) +
+      formatDateTime(d, tag) +
       ' (' +
-      formatRelative(d, now || new Date(), lang) +
+      formatRelative(d, now || new Date(), tag) +
       ')'
     );
   }
 
   // https://notebooklm.google.com/notebook/<id>... -> "<id>"
-  // El formato exacto se valida en la fase de inspección (Task 10).
   function getNotebookIdFromUrl(url) {
     const m = /\/notebook\/([0-9a-zA-Z-]+)/.exec(url || '');
     return m ? m[1] : null;
@@ -156,7 +172,10 @@
   NLM.lib = {
     THRESHOLD_MS,
     MAX_DELTA_SEC,
+    FALLBACK_LANG,
     createPlaybackSession,
+    resolveLang,
+    detectLang,
     formatDateTime,
     formatRelative,
     formatLastPlayed,
