@@ -170,6 +170,8 @@ certificaciones:
 - I do not use or transfer user data for purposes that are unrelated to my item's single purpose.
 - I do not use or transfer user data to determine creditworthiness or for lending purposes.
 
-**Privacy policy URL:** no es obligatoria si no se recopilan datos, pero
-conviene tenerla. Basta con publicar [`PRIVACY.md`](../../PRIVACY.md) (por
-ejemplo en GitHub) y pegar su URL.
+**Privacy policy URL:**
+
+```text
+https://github.com/Ogires/last-listened-for-notebooklm/blob/main/PRIVACY.md
+```
