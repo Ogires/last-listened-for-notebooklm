@@ -9,9 +9,8 @@ Textos listos para pegar en el panel de desarrollador
 - ~~**Nombre.**~~ Decidido: **"Last listened for NotebookLM"**, localizado en
   `_locales/*/messages.json` (`extName`, ≤ 45 caracteres). El "for" deja claro
   que no es una extensión oficial de Google (política de marcas).
-- **Capturas** (obligatoria al menos una, 1280×800 o 640×400): una tarjeta
-  del panel Studio con la etiqueta visible. Ojo: que no salgan títulos de
-  cuadernos privados.
+- ~~**Capturas**~~ Hechas: `docs/store/screenshots/1280x800-{en,es}.png`, del cuaderno
+  de demostración "The Solar System" (sin títulos privados).
 - **Visibilidad inicial:** *No listada* (solo con enlace) unas semanas, y
   después *Pública*.
 
