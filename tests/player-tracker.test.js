@@ -201,3 +201,24 @@ describe('attachPlayerTracker sin etiqueta de pausa reconocible', () => {
     expect(onPlayed).toHaveBeenCalledTimes(1);
   });
 });
+
+// Autodiagnóstico: el tracker informa en cada poll si ve el reproductor con
+// el tiempo ilegible; health.js decide si persiste lo bastante para avisar.
+describe('attachPlayerTracker: síntoma para el autodiagnóstico', () => {
+  it('onSymptom es true solo con reproductor abierto y tiempo ilegible', () => {
+    const symptoms = [];
+    const t = playerTracker.attachPlayerTracker(document, vi.fn(), {
+      pollMs: 60000,
+      onSymptom: (bad) => symptoms.push(bad),
+    });
+    symptoms.length = 0; // descarta el poll inicial
+    document.body.innerHTML = '';
+    t.poll(); // sin reproductor
+    setPlayer({ playing: true, seconds: 3, artifact: ART_1 });
+    t.poll(); // tiempo legible
+    setPlayerUnreadableTime();
+    t.poll(); // tiempo ilegible
+    expect(symptoms).toEqual([false, false, true]);
+    t.disconnect();
+  });
+});

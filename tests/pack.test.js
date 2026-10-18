@@ -12,7 +12,14 @@ describe('empaquetado para la Chrome Web Store', () => {
 
   it('incluye todo lo que referencia el manifest', () => {
     const cs = manifest.content_scripts.flatMap((c) => [...c.js, ...c.css]);
-    const needed = ['manifest.json', ...cs, ...Object.values(manifest.icons)];
+    const needed = [
+      'manifest.json',
+      ...cs,
+      ...Object.values(manifest.icons),
+      manifest.background.service_worker,
+      manifest.options_ui.page,
+      'src/options.js',
+    ];
     for (const f of needed) expect(files, f).toContain(f);
   });
 

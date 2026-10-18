@@ -6,5 +6,47 @@
   "extDescription": {
     "message": "Affiche la date et l'heure de votre dernière écoute de chaque résumé audio de NotebookLM.",
     "description": "Descripción en chrome://extensions y en la Chrome Web Store"
+  },
+  "optionsHistory": {
+    "message": "Écoutes enregistrées dans ce navigateur : $COUNT$",
+    "description": "Página de opciones: número de escuchas guardadas",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "12"
+      }
+    }
+  },
+  "optionsClear": {
+    "message": "Effacer l'historique",
+    "description": "Página de opciones: botón"
+  },
+  "optionsClearConfirm": {
+    "message": "Supprimer les dates de toutes vos écoutes ? Cette action est irréversible.",
+    "description": "Página de opciones: confirmación antes de borrar"
+  },
+  "optionsCleared": {
+    "message": "Historique effacé.",
+    "description": "Página de opciones: tras borrar"
+  },
+  "optionsPrivacy": {
+    "message": "Votre historique est stocké uniquement dans ce navigateur. Rien n'est envoyé.",
+    "description": "Página de opciones: nota de privacidad"
+  },
+  "optionsHealthHelp": {
+    "message": "Si l'icône de l'extension affiche un « ! » rouge sur un onglet NotebookLM, NotebookLM a changé et l'extension ne parvient plus à le lire correctement. Survolez l'icône pour voir le problème ; une mise à jour de l'extension le corrige en général.",
+    "description": "Página de opciones: qué significa el \"!\" del icono"
+  },
+  "health_cards": {
+    "message": "Les fiches du panneau Studio ne sont pas reconnues.",
+    "description": "Tooltip del icono: problema \"cards\" (health.js)"
+  },
+  "health_keys": {
+    "message": "Les fiches des résumés audio ne sont pas identifiées.",
+    "description": "Tooltip del icono: problema \"keys\" (health.js)"
+  },
+  "health_player": {
+    "message": "Impossible de lire le temps du lecteur audio.",
+    "description": "Tooltip del icono: problema \"player\" (health.js)"
   }
 }
