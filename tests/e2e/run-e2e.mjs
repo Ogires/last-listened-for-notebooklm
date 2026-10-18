@@ -8,9 +8,13 @@
 import { chromium } from 'playwright';
 import { setTimeout as sleep } from 'node:timers/promises';
 import process from 'node:process';
+import { rmSync } from 'node:fs';
 
 const EXT_PATH = process.cwd();
 const PROFILE = '.e2e-profile';
+// Perfil limpio en cada ejecución: si no, las escuchas de la anterior
+// quedan en chrome.storage y los casos "sin escucha" fallan.
+rmSync(PROFILE, { recursive: true, force: true });
 const assert = (await import('node:assert')).strict;
 
 function jslog(notebook, artifact) {
@@ -21,29 +25,33 @@ function jslog(notebook, artifact) {
 const ART1 = 'e2e-art-1';
 const ART2 = 'e2e-art-2';
 const ART3 = 'e2e-art-3';
+const QUIZ = 'e2e-quiz-1';
 const NB = 'e2e-notebook';
 // Idioma que declara la página (<html lang>); '' = sin declarar.
 let pageLang = '';
+// Simula un cambio de DOM de NotebookLM: tarjetas sin id ni jslog.
+let brokenKeys = false;
 
 // Fixture que replica la estructura verificada en vivo:
 // artifact-library > artifact-library-item > .artifact-button-content >
 //   nb-icon-button[mattooltip][jslog]   +   reproductor .playback-control-button
 function fixtureHtml() {
-  const card = (art, title) => `
+  const card = (art, title, icon = 'audio_spark') => `
     <artifact-library-item>
       <div class="artifact-button-content">
+        <mat-icon class="mat-icon artifact-icon">${icon}</mat-icon>
         <span class="artifact-primary-content">
-          <span class="artifact-labels">
+          <span class="artifact-labels"${brokenKeys ? '' : ` id="artifact-labels-${art}"`}>
             <div class="title-container">${title}</div>
             <span class="artifact-details">19:07 · Deep Dive</span>
           </span>
         </span>
-        <nb-icon-button mattooltip="Reproducir" jslog="${jslog(NB, art)}"></nb-icon-button>
+        ${brokenKeys ? '' : `<nb-icon-button mattooltip="Reproducir" jslog="${jslog(NB, art)}"></nb-icon-button>`}
       </div>
     </artifact-library-item>`;
   const langAttr = pageLang ? ` lang="${pageLang}"` : '';
   return `<!DOCTYPE html><html${langAttr}><head><meta charset="utf-8"></head><body>
-    <artifact-library>${card(ART1, 'Resumen uno')}${card(ART2, 'Resumen dos')}${card(ART3, 'Resumen tres')}</artifact-library>
+    <artifact-library>${card(ART1, 'Resumen uno')}${card(ART2, 'Resumen dos')}${card(ART3, 'Resumen tres')}${card(QUIZ, 'Cuestionario', 'quiz')}</artifact-library>
     <div id="player"></div>
     <script>
       window.__sim = { open: false, playing: false, t: 0, pauseLabel: '', jslog: '' };
@@ -127,11 +135,13 @@ try {
   await page.goto('https://notebook.google.com/notebook/' + NB);
   await page.waitForTimeout(1500);
 
-  console.log('E2E last-time (Chrome real + extensión cargada)\n');
+  console.log('E2E Last listened for NotebookLM (Chromium + extensión cargada)\n');
 
-  await test('la extensión se inyecta (contenedores de etiqueta en las tarjetas)', async () => {
+  await test('la extensión se inyecta en las 3 tarjetas de audio, no en el cuestionario', async () => {
     const n = await page.evaluate(() => document.querySelectorAll('.nlm-last-played').length);
     assert.equal(n, 3, 'esperaba 3 contenedores, hay ' + n);
+    const quiz = await labelOf(page, 3);
+    assert.equal(quiz, null, 'el cuestionario no debe tener etiqueta');
   });
 
   await test('sin escucha no hay texto de etiqueta', async () => {
@@ -209,6 +219,67 @@ try {
     }, NB);
     const t = await waitFor(() => labelOf(page, 0).then((x) => (x ? x : null)), 5000, 'etiqueta tras SPA');
     assert.match(t, /^Last listened: /, t);
+  });
+
+  // Visto en vivo (2026-10-18): al generarse un artefacto nuevo, Angular
+  // reutiliza los nodos de tarjeta; cambia el id pero deja el jslog viejo.
+  await test('nodo reutilizado por Angular: cada fecha sigue a su resumen', async () => {
+    const before = await Promise.all([0, 1].map((i) => labelOf(page, i)));
+    assert.notEqual(before[0], before[1]);
+    await page.evaluate((a1) => {
+      const [c1, c2] = document.querySelectorAll('artifact-library-item');
+      // c1 pasa a ser un artefacto generándose; c2 pasa a ser ART1 (jslog de ART2)
+      c1.querySelector('[id^="artifact-labels-"]').id = 'artifact-labels-e2e-new';
+      c1.querySelector('mat-icon.artifact-icon').textContent = 'progress_activity';
+      c2.querySelector('[id^="artifact-labels-"]').id = 'artifact-labels-' + a1;
+    }, ART1);
+    await page.waitForTimeout(500);
+    const after = await Promise.all([0, 1].map((i) => labelOf(page, i)));
+    assert.equal(after[0], null, 'la tarjeta generándose no debe tener etiqueta: ' + after[0]);
+    assert.equal(after[1], before[0], 'la tarjeta 2 debe mostrar la fecha de ART1');
+  });
+
+  const sw = ctx.serviceWorkers()[0] ?? (await ctx.waitForEvent('serviceworker'));
+  const extId = new URL(sw.url()).host;
+  const badge = () =>
+    sw.evaluate(async () => {
+      const [tab] = await chrome.tabs.query({ active: true, lastFocusedWindow: true });
+      return chrome.action.getBadgeText({ tabId: tab.id });
+    });
+
+  await test('página de opciones: cuenta las escuchas y "Borrar historial" limpia las etiquetas', async () => {
+    await page.reload();
+    await page.waitForTimeout(1500);
+    const opts = await ctx.newPage();
+    await opts.goto(`chrome-extension://${extId}/src/options.html`);
+    const count = await waitFor(() => opts.textContent('#count'), 3000, 'contador');
+    assert.match(count, /: 3$/, count);
+    opts.once('dialog', (d) => d.accept());
+    await opts.click('#clear');
+    await waitFor(async () => /: 0$/.test(await opts.textContent('#count')), 3000, 'contador a 0');
+    await opts.close();
+    await page.bringToFront();
+    const t = await waitFor(
+      () => labelOf(page, 0).then((x) => (x === '' ? 'vacía' : null)),
+      5000,
+      'etiqueta vacía tras borrar'
+    );
+    assert.equal(t, 'vacía');
+  });
+
+  await test('sin "!" en el icono cuando todo funciona', async () => {
+    await page.waitForTimeout(1000);
+    assert.equal(await badge(), '');
+  });
+
+  await test('DOM roto (tarjetas de audio sin identificador) → "!" en el icono', async () => {
+    brokenKeys = true;
+    await page.reload();
+    const b = await waitFor(() => badge().then((x) => (x ? x : null)), 12000, 'badge');
+    assert.equal(b, '!');
+    brokenKeys = false;
+    await page.reload();
+    await waitFor(() => badge().then((x) => (x === '' ? 'ok' : null)), 5000, 'badge retirado');
   });
 } finally {
   await ctx.close();
