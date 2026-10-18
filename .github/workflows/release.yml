@@ -1,0 +1,39 @@
+# Al subir una etiqueta vX.Y.Z: comprueba que coincide con la versión del
+# manifest, pasa los tests y publica una release de GitHub con el zip listo
+# para subir a la Chrome Web Store (la subida a la tienda sigue siendo manual).
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+      - name: La etiqueta coincide con manifest.json
+        run: |
+          version=$(node -p "require('./manifest.json').version")
+          if [ "v$version" != "$GITHUB_REF_NAME" ]; then
+            echo "::error::La etiqueta $GITHUB_REF_NAME no coincide con la versión del manifest ($version)"
+            exit 1
+          fi
+      - run: npm ci
+      - run: npm test
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e
+        env:
+          HEADLESS: '1'
+      - run: npm run pack
+      - name: Crear la release con el zip
+        run: gh release create "$GITHUB_REF_NAME" dist/*.zip --title "$GITHUB_REF_NAME" --generate-notes
+        env:
+          GH_TOKEN: ${{ github.token }}
