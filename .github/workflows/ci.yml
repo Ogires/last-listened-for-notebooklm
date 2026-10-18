@@ -1,0 +1,29 @@
+# Tests unitarios y e2e (Chromium de Playwright + extensión cargada) en cada
+# push y pull request. El e2e no toca NotebookLM real: sirve un fixture.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e
+        env:
+          HEADLESS: '1'
+      - run: npm run pack
+      - uses: actions/upload-artifact@v4
+        with:
+          name: extension-zip
+          path: dist/*.zip
