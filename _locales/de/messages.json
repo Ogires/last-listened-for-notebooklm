@@ -6,5 +6,47 @@
   "extDescription": {
     "message": "Zeigt Datum und Uhrzeit an, wann du jede Audio-Zusammenfassung von NotebookLM zuletzt gehört hast.",
     "description": "Descripción en chrome://extensions y en la Chrome Web Store"
+  },
+  "optionsHistory": {
+    "message": "In diesem Browser gespeicherte Wiedergaben: $COUNT$",
+    "description": "Página de opciones: número de escuchas guardadas",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "12"
+      }
+    }
+  },
+  "optionsClear": {
+    "message": "Verlauf löschen",
+    "description": "Página de opciones: botón"
+  },
+  "optionsClearConfirm": {
+    "message": "Die Daten aller Wiedergaben löschen? Das kann nicht rückgängig gemacht werden.",
+    "description": "Página de opciones: confirmación antes de borrar"
+  },
+  "optionsCleared": {
+    "message": "Verlauf gelöscht.",
+    "description": "Página de opciones: tras borrar"
+  },
+  "optionsPrivacy": {
+    "message": "Dein Verlauf wird nur in diesem Browser gespeichert. Es wird nichts gesendet.",
+    "description": "Página de opciones: nota de privacidad"
+  },
+  "optionsHealthHelp": {
+    "message": "Zeigt das Erweiterungssymbol auf einem NotebookLM-Tab ein rotes „!“, hat sich NotebookLM geändert und die Erweiterung kann es nicht mehr richtig lesen. Fahre mit der Maus über das Symbol, um das Problem zu sehen; meist behebt es ein Update der Erweiterung.",
+    "description": "Página de opciones: qué significa el \"!\" del icono"
+  },
+  "health_cards": {
+    "message": "Die Karten im Studio-Bereich werden nicht erkannt.",
+    "description": "Tooltip del icono: problema \"cards\" (health.js)"
+  },
+  "health_keys": {
+    "message": "Die Karten der Audio-Zusammenfassungen werden nicht erkannt.",
+    "description": "Tooltip del icono: problema \"keys\" (health.js)"
+  },
+  "health_player": {
+    "message": "Die Zeit des Audioplayers kann nicht gelesen werden.",
+    "description": "Tooltip del icono: problema \"player\" (health.js)"
   }
 }

@@ -162,3 +162,33 @@ de audio en el cuaderno de prueba, cada uno con UUID propio verificado).
    `isStale()` lo detecta y `content.js` suelta el renderer fuera de un
    cuaderno; (b) la etiqueta heredaba Times New Roman: se fija la pila de
    fuentes de `.artifact-details`.
+
+7. **v0.4.0 (2026-10-18): nodos reutilizados, robustez y opciones.**
+   - *Defecto en vivo*: al generarse un artefacto nuevo con la página abierta,
+     Angular reutiliza los nodos `artifact-library-item` desplazando su
+     contenido. Actualiza `id="artifact-labels-<uuid>"` pero **no** el `jslog`
+     de los botones, que queda con el artefacto anterior: 3 de 4 etiquetas
+     mostraban la fecha de otra tarjeta hasta recargar. Las escuchas se
+     guardaban bien (el reproductor se crea de nuevo en cada escucha y su
+     `jslog` es fiable). Ahora la clave sale del `id`, con el `jslog` como
+     respaldo, y el observer vigila también cambios de `id`.
+   - *Tipos de tarjeta*: `mat-icon.artifact-icon` lleva la ligadura del tipo
+     (no se traduce): `audio_spark` (audio), `videocam` (vídeo), `quiz`,
+     `copy` (tarjetas didácticas), `progress_activity` (generándose). Solo
+     se etiqueta `audio_spark`; antes se creaban etiquetas vacías en
+     cuestionarios y tarjetas didácticas.
+   - *"No leídos"*: NotebookLM ya marca los artefactos sin abrir
+     (`span.cdk-visually-hidden` en `.artifact-labels`), así que se descartó
+     una marca propia "Sin escuchar" (además marcaría todo lo escuchado antes
+     de instalar la extensión).
+   - *Vídeo*: se abre en `artifact-viewer` dentro de `studio-panel` y suena en
+     un `<video>` estándar, sin `.playback-control-button`: la extensión lo
+     ignora. Para soportarlo (pendiente): eventos del `<video>` y el UUID que
+     llevan los `jslog` del propio `artifact-viewer`.
+   - *Autodiagnóstico* (`health.js`): síntomas que persisten (tarjetas sin tipo
+     reconocible, audios sin identificador, reproductor con tiempo ilegible)
+     → `!` rojo en el icono de esa pestaña, con la explicación en el tooltip.
+   - *Opciones*: escuchas guardadas y Borrar historial; las pestañas abiertas
+     se actualizan por `storage.onChanged`.
+   - *Segundo plano*: con la pestaña oculta no se repinta; el tracker sigue
+     sondeando porque el audio sigue sonando (Chrome limita a 1 s, suficiente).

@@ -6,5 +6,47 @@
   "extDescription": {
     "message": "Mostra la data e l'ora dell'ultimo ascolto di ogni riepilogo audio di NotebookLM.",
     "description": "Descripción en chrome://extensions y en la Chrome Web Store"
+  },
+  "optionsHistory": {
+    "message": "Ascolti salvati in questo browser: $COUNT$",
+    "description": "Página de opciones: número de escuchas guardadas",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "12"
+      }
+    }
+  },
+  "optionsClear": {
+    "message": "Cancella cronologia",
+    "description": "Página de opciones: botón"
+  },
+  "optionsClearConfirm": {
+    "message": "Eliminare le date di tutti i tuoi ascolti? L'operazione non può essere annullata.",
+    "description": "Página de opciones: confirmación antes de borrar"
+  },
+  "optionsCleared": {
+    "message": "Cronologia cancellata.",
+    "description": "Página de opciones: tras borrar"
+  },
+  "optionsPrivacy": {
+    "message": "La cronologia resta solo in questo browser. Non viene inviato nulla.",
+    "description": "Página de opciones: nota de privacidad"
+  },
+  "optionsHealthHelp": {
+    "message": "Se l'icona dell'estensione mostra un \"!\" rosso in una scheda di NotebookLM, NotebookLM è cambiato e l'estensione non riesce più a leggerlo correttamente. Passa il mouse sull'icona per vedere il problema; di solito lo risolve un aggiornamento dell'estensione.",
+    "description": "Página de opciones: qué significa el \"!\" del icono"
+  },
+  "health_cards": {
+    "message": "Le schede del pannello Studio non vengono riconosciute.",
+    "description": "Tooltip del icono: problema \"cards\" (health.js)"
+  },
+  "health_keys": {
+    "message": "Le schede dei riepiloghi audio non vengono identificate.",
+    "description": "Tooltip del icono: problema \"keys\" (health.js)"
+  },
+  "health_player": {
+    "message": "Impossibile leggere il tempo del lettore audio.",
+    "description": "Tooltip del icono: problema \"player\" (health.js)"
   }
 }

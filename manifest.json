@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "__MSG_extName__",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "__MSG_extDescription__",
   "default_locale": "en",
   "icons": {
@@ -11,6 +11,20 @@
     "128": "icons/icon-128.png"
   },
   "permissions": ["storage"],
+  "action": {
+    "default_title": "__MSG_extName__",
+    "default_icon": {
+      "16": "icons/icon-16.png",
+      "32": "icons/icon-32.png"
+    }
+  },
+  "background": {
+    "service_worker": "src/background.js"
+  },
+  "options_ui": {
+    "page": "src/options.html",
+    "open_in_tab": true
+  },
   "content_scripts": [
     {
       "matches": ["https://notebook.google.com/*", "https://notebooklm.google.com/*"],
@@ -19,6 +33,7 @@
       "js": [
         "src/lib.js",
         "src/storage.js",
+        "src/health.js",
         "src/player-tracker.js",
         "src/selectors.js",
         "src/label-renderer.js",

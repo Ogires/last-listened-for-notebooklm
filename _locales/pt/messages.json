@@ -6,5 +6,47 @@
   "extDescription": {
     "message": "Mostra a data e a hora em que você ouviu pela última vez cada resumo em áudio do NotebookLM.",
     "description": "Descripción en chrome://extensions y en la Chrome Web Store"
+  },
+  "optionsHistory": {
+    "message": "Audições guardadas neste navegador: $COUNT$",
+    "description": "Página de opciones: número de escuchas guardadas",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "12"
+      }
+    }
+  },
+  "optionsClear": {
+    "message": "Apagar histórico",
+    "description": "Página de opciones: botón"
+  },
+  "optionsClearConfirm": {
+    "message": "Apagar as datas de todas as suas audições? Não é possível desfazer.",
+    "description": "Página de opciones: confirmación antes de borrar"
+  },
+  "optionsCleared": {
+    "message": "Histórico apagado.",
+    "description": "Página de opciones: tras borrar"
+  },
+  "optionsPrivacy": {
+    "message": "Seu histórico fica apenas neste navegador. Nada é enviado.",
+    "description": "Página de opciones: nota de privacidad"
+  },
+  "optionsHealthHelp": {
+    "message": "Se o ícone da extensão mostrar um \"!\" vermelho numa aba do NotebookLM, o NotebookLM mudou e a extensão não consegue lê-lo corretamente. Passe o mouse sobre o ícone para ver o problema; normalmente uma atualização da extensão resolve.",
+    "description": "Página de opciones: qué significa el \"!\" del icono"
+  },
+  "health_cards": {
+    "message": "Os cartões do painel Studio não são reconhecidos.",
+    "description": "Tooltip del icono: problema \"cards\" (health.js)"
+  },
+  "health_keys": {
+    "message": "Os cartões dos resumos em áudio não são identificados.",
+    "description": "Tooltip del icono: problema \"keys\" (health.js)"
+  },
+  "health_player": {
+    "message": "Não é possível ler o tempo do player de áudio.",
+    "description": "Tooltip del icono: problema \"player\" (health.js)"
   }
 }

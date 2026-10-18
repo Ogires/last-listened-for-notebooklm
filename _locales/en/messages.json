@@ -6,5 +6,47 @@
   "extDescription": {
     "message": "Shows the date and time you last listened to each NotebookLM Audio Overview.",
     "description": "Descripción en chrome://extensions y en la Chrome Web Store"
+  },
+  "optionsHistory": {
+    "message": "Listens saved in this browser: $COUNT$",
+    "description": "Página de opciones: número de escuchas guardadas",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "12"
+      }
+    }
+  },
+  "optionsClear": {
+    "message": "Clear history",
+    "description": "Página de opciones: botón"
+  },
+  "optionsClearConfirm": {
+    "message": "Delete the dates of all your listens? This can't be undone.",
+    "description": "Página de opciones: confirmación antes de borrar"
+  },
+  "optionsCleared": {
+    "message": "History cleared.",
+    "description": "Página de opciones: tras borrar"
+  },
+  "optionsPrivacy": {
+    "message": "Your history is stored only in this browser. Nothing is sent anywhere.",
+    "description": "Página de opciones: nota de privacidad"
+  },
+  "optionsHealthHelp": {
+    "message": "If the extension icon shows a red \"!\" on a NotebookLM tab, NotebookLM has changed and the extension can't read it properly. Hover over the icon to see the problem; an update of the extension usually fixes it.",
+    "description": "Página de opciones: qué significa el \"!\" del icono"
+  },
+  "health_cards": {
+    "message": "Can't recognize the cards in the Studio panel.",
+    "description": "Tooltip del icono: problema \"cards\" (health.js)"
+  },
+  "health_keys": {
+    "message": "Can't identify the Audio Overview cards.",
+    "description": "Tooltip del icono: problema \"keys\" (health.js)"
+  },
+  "health_player": {
+    "message": "Can't read the time of the audio player.",
+    "description": "Tooltip del icono: problema \"player\" (health.js)"
   }
 }
