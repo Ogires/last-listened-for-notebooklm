@@ -19,6 +19,28 @@ function cardHtml(artifact, title) {
   return `<artifact-library-item><div class="artifact-button-content">${title}${btn}</div></artifact-library-item>`;
 }
 
+// Estructura real (2026-10-18): icono de tipo (ligadura) + id con el UUID.
+// jslogArt permite simular el jslog caducado de un nodo reutilizado.
+function realCard(artifact, icon, { jslogArt = artifact } = {}) {
+  const id = artifact ? ` id="artifact-labels-${artifact}"` : '';
+  const btn = jslogArt
+    ? `<nb-icon-button mattooltip="Reproducir" jslog="${jslog(jslogArt)}"></nb-icon-button>`
+    : '';
+  return `<artifact-library-item><div class="artifact-button-content">
+      <mat-icon class="mat-icon artifact-icon">${icon}</mat-icon>
+      <span class="artifact-labels"${id}>Título</span>${btn}
+    </div></artifact-library-item>`;
+}
+
+// Lo que hace Angular al reutilizar un nodo: cambia id e icono, no el jslog.
+function reuseCard(card, artifact, icon) {
+  card.querySelector('[id^="artifact-labels-"]').id = 'artifact-labels-' + artifact;
+  card.querySelector('mat-icon.artifact-icon').textContent = icon;
+}
+
+const tick = (ms = 0) => new Promise((r) => setTimeout(r, ms));
+const ISO2 = '2026-10-16T08:00:00.000Z';
+
 function setup(cardsHtml, timestamps, optsExtra) {
   document.body.innerHTML = `<artifact-library>${cardsHtml}</artifact-library>`;
   const getTimestamp = async (key) => timestamps[key] || null;
@@ -123,6 +145,92 @@ describe('createLabelRenderer', () => {
     expect(renderer.isStale()).toBe(false); // sigue sin contenedor: vigila body
     document.body.innerHTML = '<artifact-library></artifact-library>';
     expect(renderer.isStale()).toBe(true);
+    renderer.disconnect();
+  });
+
+  it('etiqueta tarjetas con la estructura real (icono de tipo + id con el UUID)', async () => {
+    const renderer = setup(realCard('art-1', 'audio_spark'), { 'art-1': ISO });
+    await tick();
+    expect(document.querySelector('.nlm-last-played').textContent).toContain('Última escucha');
+    renderer.disconnect();
+  });
+
+  // Visto en vivo (2026-10-18): al generarse un artefacto nuevo, Angular
+  // reutiliza los nodos de tarjeta desplazando su contenido; actualiza el id
+  // "artifact-labels-<uuid>" pero deja el jslog del artefacto anterior.
+  it('la clave sale del id de la tarjeta, no del jslog caducado', async () => {
+    const renderer = setup(realCard('art-2', 'audio_spark', { jslogArt: 'art-1' }), {
+      'art-1': ISO,
+    });
+    await tick();
+    // art-2 no tiene escucha: vacía, no la fecha de art-1 que dice el jslog
+    expect(document.querySelector('.nlm-last-played').textContent).toBe('');
+    renderer.disconnect();
+  });
+
+  it('nodo reutilizado: la etiqueta sigue al artefacto, no al nodo', async () => {
+    const renderer = setup(
+      realCard('art-1', 'audio_spark') + realCard('art-2', 'audio_spark'),
+      { 'art-1': ISO, 'art-2': ISO2 }
+    );
+    await tick();
+    const texts = () =>
+      [...document.querySelectorAll('artifact-library-item')].map(
+        (c) => (c.querySelector('.nlm-last-played') || {}).textContent || ''
+      );
+    const [t1, t2] = texts();
+    expect(t1).not.toBe(t2);
+    // Angular inserta "generándose" arriba reutilizando los nodos: el primero
+    // pasa a ser el nuevo artefacto, el segundo pasa a ser art-1 (jslog viejo).
+    const [c1, c2] = document.querySelectorAll('artifact-library-item');
+    reuseCard(c1, 'art-new', 'progress_activity');
+    reuseCard(c2, 'art-1', 'audio_spark');
+    document.querySelector('artifact-library').insertAdjacentHTML(
+      'beforeend',
+      realCard('art-2', 'audio_spark')
+    );
+    await tick(20);
+    expect(texts()).toEqual(['', t1, t2]);
+    expect(c1.hasAttribute('title')).toBe(false); // tooltip viejo retirado
+    renderer.disconnect();
+  });
+
+  it('solo etiqueta resúmenes de audio (no cuestionarios ni tarjetas didácticas)', async () => {
+    const renderer = setup(
+      realCard('quiz-1', 'quiz') + realCard('cards-1', 'copy') + realCard('art-1', 'audio_spark'),
+      { 'quiz-1': ISO, 'cards-1': ISO, 'art-1': ISO }
+    );
+    await tick();
+    const labels = document.querySelectorAll('.nlm-last-played');
+    expect(labels.length).toBe(1);
+    expect(labels[0].closest('artifact-library-item').querySelector('[id]').id).toBe(
+      'artifact-labels-art-1'
+    );
+    renderer.disconnect();
+  });
+
+  it('el id cambiado sin mutar hijos también re-renderiza', async () => {
+    const renderer = setup(realCard('art-1', 'audio_spark'), { 'art-1': ISO, 'art-2': ISO2 });
+    await tick();
+    const before = document.querySelector('.nlm-last-played').textContent;
+    document.querySelector('[id^="artifact-labels-"]').id = 'artifact-labels-art-2';
+    await tick(20);
+    expect(document.querySelector('.nlm-last-played').textContent).not.toBe(before);
+    renderer.disconnect();
+  });
+
+  it('onStats informa de tarjetas, audios, claves y tipos desconocidos', async () => {
+    const stats = [];
+    const renderer = setup(
+      realCard('art-1', 'audio_spark') +
+        realCard('quiz-1', 'quiz') +
+        cardHtml('art-3', 'Sin icono') +
+        realCard(null, 'audio_spark', { jslogArt: null }),
+      {},
+      { onStats: (s) => stats.push(s) }
+    );
+    await tick();
+    expect(stats[0]).toEqual({ cards: 4, listenable: 2, keyed: 1, unknown: 1 });
     renderer.disconnect();
   });
 
