@@ -35,6 +35,7 @@ panel: "Last listened: 10/16/2026, 12:17 PM (2 hr. ago)". A listen counts after
   German, Portuguese and Italian.
 • Private by design: your history is stored only in your browser
   (chrome.storage.local). Nothing is sent anywhere, no account, no analytics.
+• Clear your history at any time: click the extension icon.
 
 Not affiliated with or endorsed by Google.
 ```
@@ -54,6 +55,7 @@ Studio: "Última escucha: 16/10/2026, 12:17 (hace 2 h)". Una escucha cuenta tras
 • Privada por diseño: tu historial se guarda solo en tu navegador
   (chrome.storage.local). No se envía nada a ningún sitio: sin cuentas ni
   analítica.
+• Borra tu historial cuando quieras: pulsa el icono de la extensión.
 
 Sin relación con Google ni respaldo por su parte.
 ```
@@ -73,6 +75,7 @@ comptent pas.
   espagnol, allemand, portugais et italien.
 • Confidentielle par conception : votre historique reste uniquement dans votre
   navigateur (chrome.storage.local). Rien n'est envoyé, ni compte ni analyse.
+• Effacez votre historique à tout moment : cliquez sur l'icône de l'extension.
 
 Sans lien avec Google et non approuvée par Google.
 ```
@@ -91,6 +94,7 @@ Zeile hinzu: „Zuletzt gehört: 16.10.2026, 12:17 (vor 2 Std.)“. Gezählt wir
   Spanisch, Französisch, Portugiesisch und Italienisch.
 • Privat by Design: Dein Verlauf wird nur in deinem Browser gespeichert
   (chrome.storage.local). Es wird nichts gesendet – kein Konto, keine Analyse.
+• Lösche deinen Verlauf jederzeit: Klicke auf das Erweiterungssymbol.
 
 Nicht mit Google verbunden oder von Google unterstützt.
 ```
@@ -109,6 +113,7 @@ após 5 segundos de reprodução real; saltos na barra não contam.
   espanhol, francês, alemão e italiano.
 • Privada por padrão: seu histórico fica apenas no seu navegador
   (chrome.storage.local). Nada é enviado: sem conta e sem análises.
+• Apague seu histórico quando quiser: clique no ícone da extensão.
 
 Sem vínculo com o Google e sem endosso do Google.
 ```
@@ -129,6 +134,7 @@ contano.
 • Privata per progettazione: la cronologia resta solo nel tuo browser
   (chrome.storage.local). Non viene inviato nulla: nessun account, nessuna
   analisi.
+• Cancella la cronologia quando vuoi: fai clic sull'icona dell'estensione.
 
 Non affiliata né approvata da Google.
 ```

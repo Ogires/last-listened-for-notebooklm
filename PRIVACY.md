@@ -1,6 +1,6 @@
 # Privacy policy / Política de privacidad — Last listened for NotebookLM
 
-*Last updated / Última actualización: 2026-10-16*
+*Last updated / Última actualización: 2026-10-18*
 
 ## English
 
@@ -13,7 +13,8 @@ Last listened for NotebookLM does not collect, transmit or share any personal da
   (`chrome.storage.local`). It is never sent to the developer or to any third
   party, and it is not synced between devices.
 - The extension does not read your notebooks' contents, sources or chats.
-- Uninstalling the extension deletes all of its data.
+- You can delete it at any time from the extension's options (click its icon →
+  *Clear history*). Uninstalling the extension also deletes all of its data.
 
 ## Español
 
@@ -26,4 +27,5 @@ Last listened for NotebookLM (Última escucha para NotebookLM) no recopila, tran
   extensiones del navegador (`chrome.storage.local`). Nunca se envían al
   desarrollador ni a terceros, y no se sincronizan entre dispositivos.
 - La extensión no lee el contenido, las fuentes ni los chats de tus cuadernos.
-- Al desinstalar la extensión se borran todos sus datos.
+- Puedes borrarlos cuando quieras desde las opciones de la extensión (pulsa su
+  icono → *Borrar historial*). Al desinstalarla también se borran todos.
