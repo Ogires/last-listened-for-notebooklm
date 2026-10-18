@@ -32,6 +32,43 @@ describe('localización del manifest (_locales)', () => {
     }
   });
 
+  // Textos del service worker y de la página de opciones: clave literal en
+  // getMessage/msg, data-i18n en el HTML, y health_<código> por problema.
+  it('todas las claves que usa el código existen en todos los idiomas, con sus marcadores', async () => {
+    await import('../src/health.js');
+    const code = ['src/background.js', 'src/options.js'].map(read).join('\n');
+    const used = new Set([
+      // clave literal completa ('x') o ('x', subs); 'health_' + c va aparte
+      ...[...code.matchAll(/(?:getMessage|msg)\('(\w+)'[,)]/g)].map((m) => m[1]),
+      ...[...read('src/options.html').matchAll(/data-i18n="(\w+)"/g)].map((m) => m[1]),
+      ...globalThis.NLM.health.CODES.map((c) => 'health_' + c),
+    ]);
+    expect(used.size).toBeGreaterThan(5);
+    const en = JSON.parse(read('_locales/en/messages.json'));
+    for (const loc of locales) {
+      const messages = JSON.parse(read(`_locales/${loc}/messages.json`));
+      for (const k of used) {
+        expect(messages[k] && messages[k].message, `${loc}.${k}`).toBeTruthy();
+        const marks = (s) => (s.match(/\$\w+\$/g) || []).sort();
+        expect(marks(messages[k].message), `${loc}.${k}`).toEqual(marks(en[k].message));
+      }
+    }
+  });
+
+  it('los archivos que declara el manifest existen', () => {
+    const files = [
+      manifest.background.service_worker,
+      manifest.options_ui.page,
+      ...Object.values(manifest.action.default_icon),
+    ];
+    for (const f of files) expect(() => read(f), f).not.toThrow();
+  });
+
+  it('no pide permisos nuevos (solo storage): sin aviso extra al actualizar', () => {
+    expect(manifest.permissions).toEqual(['storage']);
+    expect(manifest.host_permissions).toBeUndefined();
+  });
+
   it('extDescription cabe en el límite de Chrome (132 caracteres)', () => {
     for (const loc of locales) {
       const { extDescription } = JSON.parse(read(`_locales/${loc}/messages.json`));
