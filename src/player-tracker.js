@@ -36,6 +36,8 @@
       const timeEl = doc.querySelector(sel.playerTime);
       const cur = timeEl ? parsePlaybackSeconds(timeEl.textContent) : null;
 
+      // Para el autodiagnóstico (health.js), que decide si el síntoma persiste.
+      if (opts && opts.onSymptom) opts.onSymptom(!!button && cur === null);
       if (button && cur === null) {
         unreadable++;
         if (!warned && unreadable >= warnAfterPolls) {
