@@ -31,7 +31,9 @@ Disponible en la [Chrome Web Store](https://chromewebstore.google.com/detail/mfe
 - CI: GitHub Actions pasa los tests unitarios y el e2e en cada push a `main`
   y en cada pull request. Para publicar una versión: subir `version` en
   `manifest.json`, crear la etiqueta `vX.Y.Z` y hacer push de la etiqueta; la
-  release de GitHub sale con el zip adjunto (la subida a la tienda es manual).
+  release de GitHub sale con el zip adjunto y el workflow lo sube a la Chrome
+  Web Store y lo envía a revisión (variables del repo `CWS_*` y `GCP_*`; sin
+  `CWS_PUBLISHER_ID` la subida se omite).
 - Iconos: editar `icons/icon.svg` y regenerar los PNG con `npm run icons`.
 - Cargar en Chrome: `chrome://extensions` → activar *Modo desarrollador* →
   *Cargar descomprimida* → seleccionar la carpeta del proyecto (raíz, donde

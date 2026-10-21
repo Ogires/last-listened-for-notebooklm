@@ -1,6 +1,8 @@
 # Al subir una etiqueta vX.Y.Z: comprueba que coincide con la versión del
-# manifest, pasa los tests y publica una release de GitHub con el zip listo
-# para subir a la Chrome Web Store (la subida a la tienda sigue siendo manual).
+# manifest, pasa los tests, publica una release de GitHub con el zip y lo envía
+# a revisión de la Chrome Web Store (API v2). La autenticación con Google es sin
+# claves (Workload Identity Federation, proyecto lotero-publicacion), y solo
+# admite etiquetas v* de este repo.
 name: Release
 
 on:
@@ -9,6 +11,7 @@ on:
 
 permissions:
   contents: write
+  id-token: write
 
 jobs:
   release:
@@ -34,6 +37,48 @@ jobs:
           HEADLESS: '1'
       - run: npm run pack
       - name: Crear la release con el zip
-        run: gh release create "$GITHUB_REF_NAME" dist/*.zip --title "$GITHUB_REF_NAME" --generate-notes
+        # Si ya existe (al relanzar el job), no se vuelve a crear.
+        run: |
+          gh release view "$GITHUB_REF_NAME" > /dev/null 2>&1 ||
+            gh release create "$GITHUB_REF_NAME" dist/*.zip --title "$GITHUB_REF_NAME" --generate-notes
         env:
           GH_TOKEN: ${{ github.token }}
+
+      # Sin la variable CWS_PUBLISHER_ID el envío a la tienda se omite.
+      - name: Credenciales de Google
+        id: google
+        if: vars.CWS_PUBLISHER_ID != ''
+        uses: google-github-actions/auth@v3
+        with:
+          workload_identity_provider: ${{ vars.GCP_WIF_PROVIDER }}
+          service_account: ${{ vars.GCP_SERVICE_ACCOUNT }}
+          token_format: access_token
+          access_token_scopes: https://www.googleapis.com/auth/chromewebstore
+      - name: Subir a la Chrome Web Store y enviar a revisión
+        if: vars.CWS_PUBLISHER_ID != ''
+        env:
+          TOKEN: ${{ steps.google.outputs.access_token }}
+          ITEM: https://chromewebstore.googleapis.com/v2/publishers/${{ vars.CWS_PUBLISHER_ID }}/items/${{ vars.CWS_EXTENSION_ID }}
+          SUBIDA: https://chromewebstore.googleapis.com/upload/v2/publishers/${{ vars.CWS_PUBLISHER_ID }}/items/${{ vars.CWS_EXTENSION_ID }}
+        run: |
+          set -euo pipefail
+          zip=$(ls dist/*.zip)
+
+          respuesta=$(curl -sS --fail-with-body -X POST -H "Authorization: Bearer $TOKEN" -T "$zip" "$SUBIDA:upload")
+          echo "Subida: $respuesta"
+          estado=$(jq -r '.uploadState // empty' <<< "$respuesta")
+
+          # La subida puede quedar procesándose: se consulta hasta 5 minutos.
+          for _ in $(seq 30); do
+            [ "$estado" = "IN_PROGRESS" ] || break
+            sleep 10
+            respuesta=$(curl -sS --fail-with-body -H "Authorization: Bearer $TOKEN" "$ITEM:fetchStatus")
+            estado=$(jq -r '.lastAsyncUploadState // empty' <<< "$respuesta")
+          done
+          if [ "$estado" != "SUCCEEDED" ]; then
+            echo "::error::La subida no terminó bien ($estado): $respuesta"
+            exit 1
+          fi
+
+          respuesta=$(curl -sS --fail-with-body -X POST -H "Authorization: Bearer $TOKEN" "$ITEM:publish")
+          echo "Envío a revisión: $respuesta"
